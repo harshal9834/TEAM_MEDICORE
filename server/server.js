@@ -7,16 +7,13 @@ const dotenv = require('dotenv');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
-const { initializeSocket } = require('./utils/socket');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-// Debug: Check if env variables are loaded
-console.log('Environment check:');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Loaded ✓' : 'Missing ✗');
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Loaded ✓' : 'Missing ✗');
-console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
+// Import custom modules
+const { initializeSocket } = require('./utils/socket');
+const { initializeFirebase } = require('./middleware/firebaseAuth');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -32,10 +29,48 @@ const cartRoutes = require('./routes/cart.routes');
 const newsRoutes = require('./routes/news.routes');
 const marketPriceRoutes = require('./routes/marketPrice.routes');
 const wasteProductRoutes = require('./routes/wasteProduct.routes');
+const cottonDiseaseRoutes = require('./routes/cottonDisease.routes');
 
-// Initialize express app
 const app = express();
 const server = http.createServer(app);
+
+// ------------------
+// 🔐 Security Middleware
+// ------------------
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// ------------------
+// 📂 Static Files
+// ------------------
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/image', express.static(path.join(__dirname, '../image')));
+
+// ------------------
+// 🗄 MongoDB Connection
+// ------------------
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .catch((err) => {
+    console.error('❌ MongoDB Connection Error:', err);
+    process.exit(1);
+  });
+
+// ------------------
+// 🔥 Initialize Firebase
+// ------------------
+console.log('\n🔥 Initializing Firebase...');
+initializeFirebase();
+
+// ------------------
+// 🌐 Socket.IO Setup
+// ------------------
 const io = socketIO(server, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -43,34 +78,38 @@ const io = socketIO(server, {
   }
 });
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
-// Serve static files from image directory (for seeded products)
-app.use('/image', express.static(path.join(__dirname, '../image')));
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB Connected Successfully'))
-.catch((err) => console.error('❌ MongoDB Connection Error:', err));
-
-// Initialize Socket.IO with event handlers
 initializeSocket(io);
-
-// Make io accessible to routes
 app.set('io', io);
 
-// API Routes
+// ------------------
+// 🏠 Root Route (FIXED 404 ISSUE)
+// ------------------
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: '🚀 Cotton Disease Detection API is running',
+    environment: process.env.NODE_ENV || 'development',
+    health_check: '/api/health'
+  });
+});
+
+// Prevent favicon 404 spam
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// ------------------
+// 📡 Health Check
+// ------------------
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    status: 'OK',
+    message: 'Server is healthy'
+  });
+});
+
+// ------------------
+// 📦 API Routes
+// ------------------
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
@@ -84,17 +123,23 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/waste-products', wasteProductRoutes);
+app.use('/api/cotton', cottonDiseaseRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+// ------------------
+// ❌ 404 Handler
+// ------------------
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.originalUrl}`
+  });
 });
 
-
-
-// Error handling middleware
+// ------------------
+// 🛑 Global Error Handler
+// ------------------
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('🔥 Server Error:', err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
@@ -102,16 +147,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// Start server
+// ------------------
+// 🚀 Start Server
+// ------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
+  console.log('\n🚀 Server Started Successfully');
+  console.log(`🌍 Port: ${PORT}`);
+  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 module.exports = { app, io };

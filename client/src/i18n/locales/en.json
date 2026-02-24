@@ -413,5 +413,40 @@
     "freshProduce": "Fresh produce availability",
     "paymentMethods": "Payment methods accepted",
     "returnPolicy": "Return and refund policy"
+  },
+  "diseaseDetection": {
+    "title": "🌾 Crop Disease Detection",
+    "subtitle": "Upload an image to detect crop diseases using AI",
+    "clickSelect": "Click to select an image",
+    "dragDrop": "or drag and drop",
+    "chooseDifferent": "Choose Different Image",
+    "detectDisease": "Detect Disease",
+    "analyzing": "Analyzing...",
+    "detectionComplete": "Detection Complete",
+    "diseaseDetected": "Disease Detected",
+    "confidenceLevel": "Confidence Level",
+    "processingTime": "Processing Time",
+    "recommendations": "🌾 Agricultural Recommendations",
+    "symptoms": "📋 Symptoms",
+    "diseaseCause": "🔍 Disease Cause",
+    "organicTreatment": "🌿 Organic Treatment",
+    "chemicalTreatment": "⚗️ Chemical Treatment",
+    "fertilizerAdvice": "🥗 Fertilizer Advice",
+    "irrigationAdvice": "💧 Irrigation Advice",
+    "preventionTips": "✅ Prevention Tips",
+    "severityLevel": "⚠️ Severity Level",
+    "affectedCrops": "🌽 Affected Crops",
+    "testAnother": "Test Another Image",
+    "howItWorks": "ℹ️ How It Works",
+    "howItWorksItems": [
+      "Upload a clear image of the affected crop",
+      "AI model analyzes the image for disease patterns",
+      "Get instant diagnosis with confidence level",
+      "Supported formats: JPG, PNG, WebP, TIFF",
+      "Max file size: 10MB"
+    ],
+    "noRecommendations": "No recommendations available",
+    "noTips": "No prevention tips available",
+    "uploadError": "Please select an image first."
   }
 }

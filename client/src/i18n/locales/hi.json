@@ -413,5 +413,40 @@
     "freshProduce": "ताजे उत्पादों की उपलब्धता",
     "paymentMethods": "स्वीकृत भुगतान विधियां",
     "returnPolicy": "वापसी और रिफंड नीति"
+  },
+  "diseaseDetection": {
+    "title": "🌾 फसल रोग पहचान",
+    "subtitle": "AI का उपयोग करके फसल के रोगों का पता लगाने के लिए एक छवि अपलोड करें",
+    "clickSelect": "छवि चुनने के लिए क्लिक करें",
+    "dragDrop": "या खींचें और छोड़ें",
+    "chooseDifferent": "दूसरी छवि चुनें",
+    "detectDisease": "रोग का पता लगाएं",
+    "analyzing": "विश्लेषण कर रहा है...",
+    "detectionComplete": "पहचान पूरी हुई",
+    "diseaseDetected": "रोग का पता चला",
+    "confidenceLevel": "आत्मविश्वास स्तर",
+    "processingTime": "प्रसंस्करण समय",
+    "recommendations": "🌾 कृषि सिफारिशें",
+    "symptoms": "📋 लक्षण",
+    "diseaseCause": "🔍 रोग का कारण",
+    "organicTreatment": "🌿 जैविक उपचार",
+    "chemicalTreatment": "⚗️ रासायनिक उपचार",
+    "fertilizerAdvice": "🥗 उर्वरक सलाह",
+    "irrigationAdvice": "💧 सिंचाई सलाह",
+    "preventionTips": "✅ रोकथाम युक्तियाँ",
+    "severityLevel": "⚠️ गंभीरता स्तर",
+    "affectedCrops": "🌽 प्रभावित फसलें",
+    "testAnother": "दूसरी छवि का परीक्षण करें",
+    "howItWorks": "ℹ️ यह कैसे काम करता है",
+    "howItWorksItems": [
+      "प्रभावित फसल की एक स्पष्ट छवि अपलोड करें",
+      "AI मॉडल रोग पैटर्न के लिए छवि का विश्लेषण करता है",
+      "आत्मविश्वास स्तर के साथ तत्काल निदान प्राप्त करें",
+      "समर्थित प्रारूप: JPG, PNG, WebP, TIFF",
+      "अधिकतम फ़ाइल आकार: 10MB"
+    ],
+    "noRecommendations": "कोई सिफारिश उपलब्ध नहीं है",
+    "noTips": "रोकथाम के लिए कोई सुझाव उपलब्ध नहीं है",
+    "uploadError": "कृपया पहले एक छवि चुनें।"
   }
 }

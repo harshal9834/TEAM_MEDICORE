@@ -40,19 +40,19 @@ const ConsumerDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-20">
+    <div className="pb-20">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-50 shadow-xl">
-        <div className="container mx-auto p-4">
+      <header className="bg-transparent text-[#2E7D32] sticky top-0 z-50 py-4 px-2 backdrop-blur-md">
+        <div className="container mx-auto p-4 bg-white/80 rounded-[24px] shadow-sm border border-white/50">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <i className="fas fa-shopping-bag text-2xl text-blue-200"></i>
+              <i className="fas fa-shopping-bag text-2xl text-[#4CAF50]"></i>
               <h1 className="text-3xl font-bold">
-                <span className="text-white">{t('consumerDashboard.farm')}</span>
-                <span className="text-blue-200">{t('consumerDashboard.shop')}</span>
+                <span className="text-[#2E7D32]">{t('consumerDashboard.farm')}</span>
+                <span className="text-[#FFC107]">{t('consumerDashboard.shop')}</span>
               </h1>
             </div>
-            
+
             <div className="relative flex-1 max-w-2xl mx-4">
               <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
               <input
@@ -63,9 +63,8 @@ const ConsumerDashboard = () => {
                 className="pl-10 pr-4 py-2 w-full rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-            
-            <Link to="/profile" className="bg-blue-200 hover:bg-blue-300 p-2 rounded-full transition">
-              <i className="fas fa-user text-blue-700"></i>
+            <Link to="/profile" className="bg-[#FFF8E1] hover:bg-[#FFECB3] p-2 rounded-full transition shadow-sm">
+              <i className="fas fa-user text-[#FFC107]"></i>
             </Link>
           </div>
         </div>
@@ -73,45 +72,46 @@ const ConsumerDashboard = () => {
 
       {/* Promotional Banner */}
       <div className="container mx-auto px-4 mt-6">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-6 flex items-center justify-between mb-6 text-white">
+        <div className="card border-l-[6px] border-[#FFC107] flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <div className="bg-white bg-opacity-20 p-3 rounded-full mr-4">
-              <i className="fas fa-gift text-3xl"></i>
+            <div className="bg-[#FFF8E1] p-4 rounded-full mr-5 shadow-sm">
+              <i className="fas fa-gift text-3xl text-[#FFC107]"></i>
             </div>
             <div>
-              <h3 className="font-bold text-lg">{t('consumerDashboard.specialOffer')}</h3>
-              <p className="text-blue-100">{t('consumerDashboard.offerDescription')}</p>
+              <h3 className="font-extrabold text-xl text-[#2E7D32] tracking-tight">{t('consumerDashboard.specialOffer')}</h3>
+              <p className="text-[#555] font-medium mt-1">{t('consumerDashboard.offerDescription')}</p>
             </div>
           </div>
-          <button className="hidden md:block bg-white text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 font-semibold transition">
+          <button className="hidden md:block btn-primary">
             {t('consumerDashboard.shopNow')} <i className="fas fa-chevron-right ml-2 text-sm"></i>
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-2">
         {/* Shopping Section */}
-        <section className="mb-8">
+        <section className="mb-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 border-l-4 border-blue-400 pl-3">
+            <h2 className="title-primary border-l-4 border-[#FFC107] pl-4">
               {t('consumerDashboard.shoppingServices')}
             </h2>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filteredShoppingItems.map((item, index) => (
               <Link
                 key={index}
                 to={item.link}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="card border-t-[6px] group"
+                style={{ borderColor: getColorClasses(item.color).includes('green') ? '#4CAF50' : getColorClasses(item.color).includes('red') ? '#EF5350' : getColorClasses(item.color).includes('blue') ? '#42A5F5' : '#AB47BC' }}
               >
-                <div className={`flex flex-col items-center p-4 border-b-4 ${getColorClasses(item.color).split(' ')[0]}`}>
-                  <div className={`w-16 h-16 mb-3 rounded-full flex items-center justify-center ${getColorClasses(item.color).split(' ')[1]}`}>
-                    <i className={`fas ${item.icon} text-2xl ${getColorClasses(item.color).split(' ')[2]}`}></i>
+                <div className="flex flex-col items-center">
+                  <div className={`w-[70px] h-[70px] mb-4 rounded-full flex items-center justify-center shadow-inner transition-transform group-hover:scale-110 ${getColorClasses(item.color).split(' ')[1]}`}>
+                    <i className={`fas ${item.icon} text-3xl ${getColorClasses(item.color).split(' ')[2]}`}></i>
                   </div>
-                  <span className="text-gray-800 font-medium text-center">{item.title}</span>
-                  <span className="text-xs text-gray-500 mt-1 text-center">{item.desc}</span>
+                  <span className="text-gray-800 font-bold text-[15px] text-center leading-tight mb-1">{item.title}</span>
+                  <span className="text-[12px] text-gray-500 text-center font-medium leading-tight">{item.desc}</span>
                 </div>
               </Link>
             ))}
@@ -137,67 +137,59 @@ const ConsumerDashboard = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t-2 border-gray-200 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-nav border-t border-gray-100 z-50 rounded-t-[30px] px-2 pb-2 pt-1">
         <div className="flex justify-around py-3 max-w-lg mx-auto">
-          <Link 
-            to="/consumer/dashboard" 
-            className={`flex flex-col items-center transition-all ${
-              isActive('/consumer/dashboard') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
-            }`}
+          <Link
+            to="/consumer/dashboard"
+            className={`flex flex-col items-center transition-all ${isActive('/consumer/dashboard') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
+              }`}
           >
-            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${
-              isActive('/consumer/dashboard') 
-                ? 'bg-blue-100 scale-110' 
-                : 'bg-gray-100 hover:bg-blue-50'
-            }`}>
+            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${isActive('/consumer/dashboard')
+              ? 'bg-blue-100 scale-110'
+              : 'bg-gray-100 hover:bg-blue-50'
+              }`}>
               <i className="fas fa-home text-xl"></i>
             </div>
             <span className="text-xs font-semibold">{t('consumerDashboard.home')}</span>
           </Link>
-          
-          <Link 
-            to="/posts" 
-            className={`flex flex-col items-center transition-all ${
-              isActive('/posts') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
-            }`}
+
+          <Link
+            to="/posts"
+            className={`flex flex-col items-center transition-all ${isActive('/posts') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
+              }`}
           >
-            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${
-              isActive('/posts') 
-                ? 'bg-blue-100 scale-110' 
-                : 'bg-gray-100 hover:bg-blue-50'
-            }`}>
+            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${isActive('/posts')
+              ? 'bg-blue-100 scale-110'
+              : 'bg-gray-100 hover:bg-blue-50'
+              }`}>
               <i className="fas fa-comments text-xl"></i>
             </div>
             <span className="text-xs font-semibold">{t('consumerDashboard.posts')}</span>
           </Link>
-          
-          <Link 
-            to="/chat" 
-            className={`flex flex-col items-center transition-all ${
-              isActive('/chat') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
-            }`}
+
+          <Link
+            to="/chat"
+            className={`flex flex-col items-center transition-all ${isActive('/chat') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
+              }`}
           >
-            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${
-              isActive('/chat') 
-                ? 'bg-blue-100 scale-110' 
-                : 'bg-gray-100 hover:bg-blue-50'
-            }`}>
+            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${isActive('/chat')
+              ? 'bg-blue-100 scale-110'
+              : 'bg-gray-100 hover:bg-blue-50'
+              }`}>
               <i className="fas fa-comments text-xl"></i>
             </div>
             <span className="text-xs font-semibold">{t('consumerDashboard.chat')}</span>
           </Link>
-          
-          <Link 
-            to="/profile" 
-            className={`flex flex-col items-center transition-all ${
-              isActive('/profile') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
-            }`}
+
+          <Link
+            to="/profile"
+            className={`flex flex-col items-center transition-all ${isActive('/profile') ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
+              }`}
           >
-            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${
-              isActive('/profile') 
-                ? 'bg-blue-100 scale-110' 
-                : 'bg-gray-100 hover:bg-blue-50'
-            }`}>
+            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-1 transition-all ${isActive('/profile')
+              ? 'bg-blue-100 scale-110'
+              : 'bg-gray-100 hover:bg-blue-50'
+              }`}>
               <i className="fas fa-user text-xl"></i>
             </div>
             <span className="text-xs font-semibold">{t('consumerDashboard.account')}</span>
@@ -206,12 +198,12 @@ const ConsumerDashboard = () => {
       </nav>
 
       {/* Floating Action Button */}
-      <div className="fixed right-6 bottom-20 z-50">
+      <div className="fixed right-6 bottom-32 z-50">
         <Link
           to="/cart"
-          className="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
+          className="bg-[#FFC107] hover:bg-[#FFA000] text-[#212121] w-16 h-16 rounded-full shadow-fab flex items-center justify-center transition-transform hover:scale-110"
         >
-          <i className="fas fa-shopping-cart text-xl"></i>
+          <i className="fas fa-shopping-cart text-2xl font-bold"></i>
         </Link>
       </div>
     </div>

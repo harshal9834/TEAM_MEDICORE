@@ -75,23 +75,97 @@ const CropDiseaseDetection = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleImageUpload(e.dataTransfer.files[0]);
     }
   };
 
-  const analyzeImage = () => {
-    if (!image) return;
-    
+  const analyzeImage = async () => {
+    if (!imageFile) return;
     setIsAnalyzing(true);
-    
-    // Simulate AI analysis
-    setTimeout(() => {
-      const randomDisease = diseaseDatabase[Math.floor(Math.random() * diseaseDatabase.length)];
-      setResult(randomDisease);
-      setIsAnalyzing(false);
-    }, 2000);
+    setResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      const response = await fetch('/api/cotton/detect', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+
+      // Check for low confidence error
+      if (!response.ok) {
+        if (data.code === 'LOW_CONFIDENCE') {
+          setResult({
+            disease: 'Low Confidence Detection',
+            confidence: data.confidence || 0,
+            severity: 'Unknown',
+            treatment: 'Please take a clearer, well-lit photo of the affected leaves for accurate diagnosis.',
+            prevention: ['Take clear photos showing affected areas', 'Ensure good lighting', 'Focus on leaf symptoms'],
+            symptoms: [data.message || 'Image quality too low for accurate detection'],
+            affectedCrops: [],
+            noticeType: 'low_confidence'
+          });
+        } else {
+          throw new Error(data.message || 'Detection failed');
+        }
+      } else if (data && data.success && data.data) {
+        // Map backend fields to frontend expected fields (Hybrid ViT-Groq system)
+        const d = data.data;
+        const recs = d.recommendations || {};
+
+        setResult({
+          disease: d.disease?.name || d.disease_name || 'Healthy',
+          severity: recs.severity_level || d.severity_level || 'Unknown',
+          confidence: d.disease?.confidence_percent || d.confidence_score_percent || 0,
+          treatment: recs.organic_treatment?.join(', ') || d.chemical_treatment?.recommended_product || 'Consult agronomist',
+          prevention: recs.prevention_tips || d.preventive_measures || [],
+          symptoms: recs.symptom_description ? [recs.symptom_description] : (d.observed_symptoms || []),
+          diseaseCause: recs.disease_cause || 'Unknown',
+          organicTreatment: recs.organic_treatment || [],
+          chemicalTreatment: recs.chemical_treatment || [],
+          fertilizerAdvice: recs.fertilizer_advice || '',
+          irrigationAdvice: recs.irrigation_advice || '',
+          affectedCrops: recs.affected_crops?.length ? recs.affected_crops : (d.crop_name ? [d.crop_name] : ['Cotton']),
+          image_url: d.image_url || '',
+          notes: d.farmer_summary || '',
+          model: d.model_used || 'AI Detection',
+          shortDescription: d.short_description || ''
+        });
+      } else {
+        setResult({
+          disease: 'Detection Error',
+          confidence: 0,
+          severity: 'Unknown',
+          treatment: 'Could not analyze image.',
+          prevention: [],
+          symptoms: [data.message || 'Unknown error'],
+          affectedCrops: [],
+          organicTreatment: [],
+          chemicalTreatment: [],
+          fertilizerAdvice: '',
+          irrigationAdvice: '',
+          diseaseCause: ''
+        });
+      }
+    } catch (err) {
+      setResult({
+        disease: 'Detection Error',
+        confidence: 0,
+        severity: 'Unknown',
+        treatment: 'Could not analyze image.',
+        prevention: [],
+        symptoms: [err.message],
+        affectedCrops: [],
+        organicTreatment: [],
+        chemicalTreatment: [],
+        fertilizerAdvice: '',
+        irrigationAdvice: '',
+        diseaseCause: ''
+      });
+    }
+    setIsAnalyzing(false);
   };
 
   const resetAnalysis = () => {
@@ -122,8 +196,8 @@ const CropDiseaseDetection = () => {
         <div className="container mx-auto px-6 py-8 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <button 
-                onClick={() => window.history.back()} 
+              <button
+                onClick={() => window.history.back()}
                 className="mr-5 hover:bg-white hover:bg-opacity-20 p-3 rounded-xl transition-all transform hover:scale-110 hover:-translate-x-1"
               >
                 <i className="fas fa-arrow-left text-2xl"></i>
@@ -157,13 +231,12 @@ const CropDiseaseDetection = () => {
                   <i className="fas fa-cloud-upload-alt text-green-600 mr-3"></i>
                   Upload Crop Image
                 </h2>
-                
+
                 <div
-                  className={`relative border-4 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ${
-                    dragActive 
-                      ? 'border-green-500 bg-green-50 scale-105' 
+                  className={`relative border-4 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ${dragActive
+                      ? 'border-green-500 bg-green-50 scale-105'
                       : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'
-                  }`}
+                    }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
@@ -176,14 +249,14 @@ const CropDiseaseDetection = () => {
                     onChange={handleFileInput}
                     className="hidden"
                   />
-                  
+
                   <div className="space-y-6">
                     <div className="flex justify-center">
                       <div className="w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-bounce">
                         <i className="fas fa-image text-white text-5xl"></i>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-2xl font-bold text-gray-700 mb-3">
                         Drag & Drop Your Image Here
@@ -192,7 +265,7 @@ const CropDiseaseDetection = () => {
                         or click the button below to browse
                       </p>
                     </div>
-                    
+
                     <button
                       onClick={() => fileInputRef.current.click()}
                       className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-10 py-4 rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-xl hover:shadow-2xl font-bold text-lg transform hover:scale-105 inline-flex items-center"
@@ -200,7 +273,7 @@ const CropDiseaseDetection = () => {
                       <i className="fas fa-folder-open mr-3 text-xl"></i>
                       Browse Files
                     </button>
-                    
+
                     <p className="text-sm text-gray-400 mt-4">
                       Supported formats: JPG, PNG, JPEG (Max 10MB)
                     </p>
@@ -254,9 +327,9 @@ const CropDiseaseDetection = () => {
                   </div>
                   <div className="p-8">
                     <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                      <img 
-                        src={image} 
-                        alt="Crop" 
+                      <img
+                        src={image}
+                        alt="Crop"
                         className="w-full h-auto max-h-96 object-contain bg-gray-100"
                       />
                     </div>
@@ -305,7 +378,7 @@ const CropDiseaseDetection = () => {
                         Analysis Complete
                       </h2>
                     </div>
-                    
+
                     <div className="p-8 space-y-6">
                       {/* Disease Name & Confidence */}
                       <div className="flex items-center justify-between p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border-2 border-red-200">
@@ -332,30 +405,105 @@ const CropDiseaseDetection = () => {
                         </span>
                       </div>
 
-                      {/* Symptoms */}
+                      {/* Symptoms & Causes */}
                       <div className="bg-yellow-50 rounded-2xl p-6 border-2 border-yellow-200">
                         <h4 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
                           <i className="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
-                          Common Symptoms
+                          Symptoms & Causes
                         </h4>
-                        <ul className="space-y-2">
-                          {result.symptoms.map((symptom, idx) => (
-                            <li key={idx} className="flex items-start text-gray-700">
-                              <i className="fas fa-circle text-yellow-600 mr-3 mt-1 text-xs"></i>
-                              <span className="text-lg">{symptom}</span>
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="space-y-4">
+                          <div>
+                            <p className="font-semibold text-gray-800 mb-2">Detailed Symptoms:</p>
+                            <ul className="space-y-2">
+                              {Array.isArray(result.symptoms) ? result.symptoms.map((symptom, idx) => (
+                                <li key={idx} className="flex items-start text-gray-700">
+                                  <i className="fas fa-circle text-yellow-600 mr-3 mt-1 text-xs"></i>
+                                  <span className="text-lg">{symptom}</span>
+                                </li>
+                              )) : null}
+                            </ul>
+                          </div>
+                          {result.diseaseCause && (
+                            <div className="pt-4 border-t border-yellow-200">
+                              <p className="font-semibold text-gray-800 mb-2">Common Causes:</p>
+                              <p className="text-gray-700 text-lg leading-relaxed">{result.diseaseCause}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Treatment */}
-                      <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
-                        <h4 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
-                          <i className="fas fa-medkit text-green-600 mr-3"></i>
-                          Recommended Treatment
-                        </h4>
-                        <p className="text-gray-700 leading-relaxed text-lg">{result.treatment}</p>
+                      {/* Treatments Grid */}
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Organic Treatment */}
+                        <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
+                          <h4 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-leaf text-green-600 mr-3"></i>
+                            Organic Treatment
+                          </h4>
+                          {result.organicTreatment && result.organicTreatment.length > 0 ? (
+                            <ul className="space-y-3">
+                              {result.organicTreatment.map((treatment, idx) => (
+                                <li key={idx} className="flex items-start text-gray-700">
+                                  <i className="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                  <span className="text-base">{treatment}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-gray-700 leading-relaxed text-lg">{result.treatment}</p>
+                          )}
+                        </div>
+
+                        {/* Chemical Treatment */}
+                        <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
+                          <h4 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-flask text-red-600 mr-3"></i>
+                            Chemical Treatment
+                          </h4>
+                          {result.chemicalTreatment && result.chemicalTreatment.length > 0 ? (
+                            <ul className="space-y-3">
+                              {result.chemicalTreatment.map((treatment, idx) => (
+                                <li key={idx} className="flex items-start text-gray-700">
+                                  <i className="fas fa-exclamation-circle text-red-500 mr-3 mt-1"></i>
+                                  <span className="text-base">{treatment}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-gray-500 italic">No specific chemical treatments available</p>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Agriculture Advice */}
+                      {(result.fertilizerAdvice || result.irrigationAdvice) && (
+                        <div className="bg-orange-50 rounded-2xl p-6 border-2 border-orange-200">
+                          <h4 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-seedling text-orange-600 mr-3"></i>
+                            Agricultural Advice
+                          </h4>
+                          <div className="grid md:grid-cols-2 gap-6">
+                            {result.fertilizerAdvice && (
+                              <div>
+                                <p className="font-semibold text-gray-800 mb-2 flex items-center">
+                                  <i className="fas fa-boxes text-orange-500 mr-2 text-sm"></i>
+                                  Fertilizer Feedback:
+                                </p>
+                                <p className="text-gray-700 leading-relaxed">{result.fertilizerAdvice}</p>
+                              </div>
+                            )}
+                            {result.irrigationAdvice && (
+                              <div>
+                                <p className="font-semibold text-gray-800 mb-2 flex items-center">
+                                  <i className="fas fa-tint text-blue-500 mr-2 text-sm"></i>
+                                  Irrigation Tips:
+                                </p>
+                                <p className="text-gray-700 leading-relaxed">{result.irrigationAdvice}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Prevention */}
                       <div className="bg-blue-50 rounded-2xl p-6 border-2 border-blue-200">
@@ -363,7 +511,20 @@ const CropDiseaseDetection = () => {
                           <i className="fas fa-shield-alt text-blue-600 mr-3"></i>
                           Prevention Tips
                         </h4>
-                        <p className="text-gray-700 leading-relaxed text-lg">{result.prevention}</p>
+                        {Array.isArray(result.prevention) ? (
+                          <ul className="space-y-2">
+                            {result.prevention.map((tip, idx) => (
+                              <li key={idx} className="flex items-start text-gray-700">
+                                <i className="fas fa-check text-blue-600 mr-3 mt-1 text-sm"></i>
+                                <span className="text-base">{tip}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : result.prevention ? (
+                          <p className="text-gray-700 leading-relaxed text-lg">{result.prevention}</p>
+                        ) : (
+                          <p className="text-gray-500 italic">No specific prevention tips available</p>
+                        )}
                       </div>
 
                       {/* Affected Crops */}
@@ -373,11 +534,11 @@ const CropDiseaseDetection = () => {
                           Commonly Affected Crops
                         </h4>
                         <div className="flex flex-wrap gap-3">
-                          {result.affectedCrops.map((crop, idx) => (
-                            <span key={idx} className="bg-purple-200 text-purple-800 px-4 py-2 rounded-full font-semibold">
+                          {Array.isArray(result.affectedCrops) ? result.affectedCrops.map((crop, idx) => (
+                            <span key={idx} className="bg-purple-200 text-purple-800 px-4 py-2 rounded-full font-semibold capitalize">
                               {crop}
                             </span>
-                          ))}
+                          )) : null}
                         </div>
                       </div>
 
@@ -433,12 +594,12 @@ const CropDiseaseDetection = () => {
                 Common Diseases
               </h3>
               <div className="space-y-3">
-                {['Late Blight', 'Powdery Mildew', 'Leaf Rust', 'Bacterial Wilt'].map((disease, idx) => (
+                {Array.isArray(['Late Blight', 'Powdery Mildew', 'Leaf Rust', 'Bacterial Wilt']) ? ['Late Blight', 'Powdery Mildew', 'Leaf Rust', 'Bacterial Wilt'].map((disease, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
                     <span className="font-semibold text-gray-700">{disease}</span>
                     <i className="fas fa-chevron-right text-gray-400"></i>
                   </div>
-                ))}
+                )) : null}
               </div>
             </div>
 

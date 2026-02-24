@@ -24,6 +24,12 @@ module.exports = {
           700: '#081c15',
         }
       },
+      boxShadow: {
+        'card': '0 15px 35px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 20px 45px rgba(0, 0, 0, 0.08)',
+        'nav': '0 -10px 30px rgba(0, 0, 0, 0.05)',
+        'fab': '0 10px 25px rgba(255, 193, 7, 0.4)',
+      }
     },
   },
   plugins: [],

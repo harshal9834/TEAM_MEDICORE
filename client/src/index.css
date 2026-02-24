@@ -2,27 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 body {
   font-family: 'Poppins', sans-serif;
+  background-color: #F5F5DC;
+  /* Soft Cream */
+  color: #212121;
 }
 
-/* Custom Tailwind Components */
+/* Custom Component Styles for Global Theme */
 @layer components {
   .btn-primary {
-    @apply bg-secondary-500 hover:bg-secondary-600 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300 hover:shadow-lg;
+    @apply bg-[#2E7D32] hover:bg-[#1B5E20] text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 disabled:bg-[#A5D6A7] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
-  
+
   .btn-secondary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300;
+    @apply bg-white border-2 border-[#2E7D32] hover:bg-[#F1F8E9] text-[#2E7D32] font-bold py-3 px-8 rounded-full transition-all duration-300 hover:-translate-y-1;
   }
-  
+
   .card {
-    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6;
+    @apply bg-white rounded-[20px] shadow-card hover:shadow-card-hover transition-all duration-300 p-6;
   }
-  
+
   .input-field {
-    @apply w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:outline-none transition-colors;
+    @apply w-full px-5 py-3 border-2 border-[#E8F5E9] bg-[#F8FDF9] rounded-[16px] focus:border-[#4CAF50] focus:ring-4 focus:ring-[#4CAF50]/20 focus:outline-none transition-all;
+  }
+
+  /* Specific elements */
+  .title-primary {
+    @apply text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-2 tracking-tight;
+  }
+
+  .subtitle-text {
+    @apply text-[#555] text-sm md:text-base font-medium;
   }
 }

@@ -413,5 +413,40 @@
     "freshProduce": "ताज्या उत्पादनांची उपलब्धता",
     "paymentMethods": "स्वीकृत पेमेंट पद्धती",
     "returnPolicy": "परतावा आणि रिफंड धोरण"
+  },
+  "diseaseDetection": {
+    "title": "🌾 पीक रोग ओळख",
+    "subtitle": "AI वापरून पीक रोग ओळखण्यासाठी प्रतिमा अपलोड करा",
+    "clickSelect": "प्रतिमा निवडण्यासाठी क्लिक करा",
+    "dragDrop": "किंवा ड्रॅग आणि ड्रॉप करा",
+    "chooseDifferent": "दुसरी प्रतिमा निवडा",
+    "detectDisease": "रोग ओळखा",
+    "analyzing": "विश्लेषण करत आहे...",
+    "detectionComplete": "ओळख पूर्ण झाली",
+    "diseaseDetected": "रोग आढळला",
+    "confidenceLevel": "आत्मविश्वास पातळी",
+    "processingTime": "प्रक्रिया वेळ",
+    "recommendations": "🌾 कृषी शिफारसी",
+    "symptoms": "📋 लक्षणे",
+    "diseaseCause": "🔍 रोगाचे कारण",
+    "organicTreatment": "🌿 सेंद्रिय उपचार",
+    "chemicalTreatment": "⚗️ रासायनिक उपचार",
+    "fertilizerAdvice": "🥗 खत सल्ला",
+    "irrigationAdvice": "💧 सिंचन सल्ला",
+    "preventionTips": "✅ प्रतिबंधात्मक टिपा",
+    "severityLevel": "⚠️ तीव्रता पातळी",
+    "affectedCrops": "🌽 प्रभावित पिके",
+    "testAnother": "दुसऱ्या प्रतिमेची चाचणी घ्या",
+    "howItWorks": "ℹ️ हे कसे कार्य करते",
+    "howItWorksItems": [
+      "प्रभावित पिकाची स्पष्ट प्रतिमा अपलोड करा",
+      "AI मॉडेल रोग नमुन्यांसाठी प्रतिमेचे विश्लेषण करते",
+      "आत्मविश्वास पातळीसह त्वरित निदान मिळवा",
+      "समर्थित स्वरूपने: JPG, PNG, WebP, TIFF",
+      "कमाल फाइल आकार: 10MB"
+    ],
+    "noRecommendations": "कोणत्याही शिफारसी उपलब्ध नाहीत",
+    "noTips": "कोणतेही प्रतिबंधात्मक टिपा उपलब्ध नाहीत",
+    "uploadError": "कृपया प्रथम एक प्रतिमा निवडा."
   }
 }
