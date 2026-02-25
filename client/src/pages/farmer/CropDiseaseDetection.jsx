@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CropDiseaseDetection = () => {
+  const navigate = useNavigate();
   const [image, setImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -615,6 +617,24 @@ const CropDiseaseDetection = () => {
               <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg font-bold">
                 <i className="fas fa-headset mr-2"></i>
                 Contact Expert
+              </button>
+            </div>
+
+            {/* Crop Recommendation */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl shadow-xl p-7 border-2 border-yellow-200">
+              <h3 className="font-bold text-xl text-gray-800 mb-4 flex items-center">
+                <i className="fas fa-leaf text-green-600 mr-3"></i>
+                फसल सुझाव
+              </h3>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                अपनी मिट्टी और मौसम के अनुसार सर्वोत्तम फसलें खोजें। आसान और किसान-अनुकूल सुझाव।
+              </p>
+              <button 
+                onClick={() => navigate('/farmer/crop-recommendation')}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg font-bold hover:shadow-xl transform hover:scale-105"
+              >
+                <i className="fas fa-search mr-2"></i>
+                फसल सुझाव खोजें
               </button>
             </div>
           </div>

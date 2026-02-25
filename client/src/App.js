@@ -15,6 +15,7 @@ import FarmerDashboard from './pages/farmer/FarmerDashboard';
 
 import CropManagement from './pages/farmer/CropManagement';
 import DiseaseDetection from './pages/DiseaseDetection';
+import CropRecommendation from './pages/farmer/CropRecommendation';
 import WasteManagement from './pages/farmer/WasteManagement';
 import ChatBot from './pages/farmer/ChatBot';
 import Posts from './pages/common/Posts';
@@ -139,6 +140,11 @@ function App() {
               <Route path="/farmer/disease-detection" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
                   <DiseaseDetection />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/crop-recommendation" element={
+                <ProtectedRoute allowedRoles={['farmer']}>
+                  <CropRecommendation />
                 </ProtectedRoute>
               } />
               <Route path="/farmer/waste" element={

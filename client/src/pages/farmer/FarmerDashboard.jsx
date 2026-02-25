@@ -15,6 +15,7 @@ const FarmerDashboard = () => {
     { icon: 'fa-recycle', title: t('navigation.wasteManagement'), desc: t('dashboard.sustainableSolutions') || 'Sustainable solutions', link: '/farmer/waste', color: 'amber' },
     { icon: 'fa-seedling', title: t('dashboard.cropDiseaseDetection') || 'Crop Disease Detection', desc: t('dashboard.aiDetection') || 'AI-powered detection', link: '/farmer/disease-detection', color: 'green' },
     { icon: 'fa-robot', title: t('navigation.chatBot'), desc: t('dashboard.instantHelp') || 'Get instant help', link: '/farmer/chatbot', color: 'amber' },
+    { icon: 'fa-leaf', title: 'Crop Recommendation', desc: 'Get best crop suggestions', link: '/farmer/crop-recommendation', color: 'green' },
     { icon: 'fa-history', title: t('orders.orderHistory'), desc: t('dashboard.trackTransactions') || 'Track all transactions', link: '/orders', color: 'blue' },
     { icon: 'fa-file-alt', title: t('dashboard.reportSection') || 'Report Section', desc: t('dashboard.submitReports') || 'Submit reports', link: '/report', color: 'green' },
   ];
