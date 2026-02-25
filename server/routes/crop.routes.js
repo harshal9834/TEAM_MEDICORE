@@ -9,4 +9,12 @@ router.get('/:id', cropController.getCropById);
 router.put('/:id', protect, cropController.updateCrop);
 router.delete('/:id', protect, cropController.deleteCrop);
 
+// Crop Recommendation Routes
+router.post('/recommendations/full', cropController.getRecommendations);
+router.post('/recommendations/quick', cropController.quickRecommend);
+
+// Groq AI Routes
+router.post('/groq-advice/:cropName', cropController.getCropAdvice);
+router.post('/soil-improvement', cropController.getSoilPlan);
+
 module.exports = router;
