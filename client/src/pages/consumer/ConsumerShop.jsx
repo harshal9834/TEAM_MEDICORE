@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api, { IMAGE_BASE_URL } from '../../utils/api';
 
 const ConsumerShop = () => {
   const { t } = useTranslation();
@@ -91,7 +91,7 @@ const ConsumerShop = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`);
+      const response = await api.get('/products');
       console.log('📦 Products loaded:', response.data.products?.length || 0, 'products');
       setProducts(response.data.products || []);
     } catch (error) {
@@ -280,7 +280,7 @@ const ConsumerShop = () => {
             {filteredProducts.map((product, index) => {
               const rating = 4 + Math.random();
               const imageUrl = product.images && product.images[0]
-                ? (product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`)
+                ? (product.images[0]?.url?.startsWith('http') ? product.images[0].url : `${IMAGE_BASE_URL}${product.images[0]?.url || ''}`)
                 : 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
 
               return (

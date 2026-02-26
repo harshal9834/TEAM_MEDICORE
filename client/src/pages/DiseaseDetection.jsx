@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import './DiseaseDetection.css';
@@ -52,8 +52,8 @@ const DiseaseDetection = () => {
       formData.append('image', image);
       formData.append('language', i18n.language);
 
-      const response = await axios.post(
-        'http://localhost:5000/api/cotton/detect',
+      const response = await api.post(
+        '/cotton/detect',
         formData,
         {
           headers: {

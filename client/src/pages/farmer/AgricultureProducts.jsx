@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { productsAPI } from '../../utils/api';
+import { productsAPI, IMAGE_BASE_URL } from '../../utils/api';
 import { useAuthStore } from '../../store/authStore';
 import { useSocket } from '../../context/SocketContext';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
@@ -475,14 +475,14 @@ const AgricultureProducts = () => {
                 <div className="h-48 bg-gray-200 overflow-hidden relative">
                   {product.images && product.images[0] ? (
                     <img
-                      src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
+                      src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `${IMAGE_BASE_URL}${product.images[0]?.url || ''}`}
                       alt={product.name}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
                         // Only fallback once to prevent infinite loops
                         if (!e.target.dataset.fallbackAttempted) {
                           e.target.dataset.fallbackAttempted = 'true';
-                          e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                          e.target.src = `${IMAGE_BASE_URL}/image/dari.jpeg`;
                         }
                       }}
                     />
