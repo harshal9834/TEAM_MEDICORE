@@ -6,20 +6,19 @@ const CottonUser = require('../models/CottonUser');
 // Initialize Firebase Admin SDK
 const initializeFirebase = () => {
   if (admin.apps.length === 0) {
-    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-    const absolutePath = path.resolve(__dirname, '../config/firebase-service-account.json');
-    
-    if (!fs.existsSync(absolutePath)) {
-      console.warn('⚠️ Firebase Service Account not found at', absolutePath);
-      console.warn('Firebase authentication will not work without this file');
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      console.warn('⚠️ Firebase environment variables not found.');
+      console.warn('Firebase authentication will not work without FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY');
       return false;
     }
 
     try {
-      const serviceAccount = require(absolutePath);
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.project_id
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        }),
       });
 
       console.log('✓ Firebase Admin SDK initialized');
@@ -37,7 +36,7 @@ const initializeFirebase = () => {
 const verifyFirebaseToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
       return res.status(401).json({
         success: false,
@@ -48,7 +47,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 
     // Extract token from Bearer scheme
     const token = authHeader.split('Bearer ')[1];
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -59,7 +58,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 
     // Verify token with Firebase
     const decodedToken = await admin.auth().verifyIdToken(token);
-    
+
     // Attach user info to request
     req.user = {
       firebase_uid: decodedToken.uid,
@@ -70,7 +69,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 
     // Get or create user in MongoDB
     let user = await CottonUser.findOne({ firebase_uid: decodedToken.uid });
-    
+
     if (!user) {
       // First login - create user in MongoDB
       user = new CottonUser({
@@ -94,7 +93,7 @@ const verifyFirebaseToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Firebase verification error:', error.message);
-    
+
     let errorCode = 'INVALID_TOKEN';
     let status = 401;
 

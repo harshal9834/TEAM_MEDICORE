@@ -189,80 +189,70 @@ function App() {
    */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const pathname = location.pathname;
+    try {
+      if (!speechEngine.recognition) {
+        console.warn('[App] Speech Recognition not available in this browser');
+        return;
+      }
 
-    // Registration page setup
-    if (pathname.includes('/register')) {
-      setTimeout(() => {
-        // Get all inputs on the page
-        const inputs = document.querySelectorAll('input');
-        const select = document.querySelector('select');
+      console.log('[App] Initializing Voice Assistant System...');
 
-        // Find inputs by type or order
-        let nameInput = null;
-        let emailInput = null;
-        let passwordInput = null;
+      languageSupport.setLanguage('en-IN');
+      speechEngine.setLanguage('en-IN');
 
-        inputs.forEach(input => {
-          if (input.type === 'text' && !nameInput) {
-            nameInput = input; // First text input is name
-          } else if (input.type === 'email' && !emailInput) {
-            emailInput = input;
-          } else if (input.type === 'password' && !passwordInput) {
-            passwordInput = input;
-          }
-        });
+      navigationHandler.setNavigateCallback((route) => {
+        console.log('[App] Navigating to:', route);
+        navigate(route);
+      });
 
-        if (nameInput || emailInput || passwordInput || select) {
-          registrationHandler.registerFormFields({
-            nameInput,
-            emailInput,
-            passwordInput,
-            sectionSelect: select,
-          });
-          console.log('[App] Registration form fields registered');
+      featureScanner.scanFeatures();
+      console.log(
+        '[App] Feature Scanner initialized with',
+        featureScanner.getFeatures().length,
+        'features'
+      );
+
+      const handleMasterTranscript = (data) => {
+        if (!data.isFinal) return;
+
+        const transcript = data.transcript.toLowerCase();
+        console.log('[App] Voice Input:', transcript);
+
+        // ✅ Use window.location instead of React location
+        const pathname = window.location.pathname;
+        let pageType = 'navigation';
+
+        if (pathname.includes('/register')) {
+          pageType = 'registration';
+        } else if (pathname.includes('/login')) {
+          pageType = 'login';
         }
-      }, 300);
+
+        try {
+          if (pageType === 'registration') {
+            registrationHandler.handleTranscript(transcript);
+          } else if (pageType === 'login') {
+            loginHandler.handleTranscript(transcript);
+          } else {
+            navigationHandler.handleCommand(transcript);
+          }
+        } catch (error) {
+          console.error('[App] Error routing voice input:', error);
+        }
+      };
+
+      speechEngine.onTranscript(handleMasterTranscript);
+
+      console.log('[App] Voice Assistant System initialized successfully');
 
       return () => {
-        registrationHandler.unregisterFormFields();
-        console.log('[App] Registration form fields unregistered');
+        console.log('[App] Cleaning up Voice Assistant System');
+        speechEngine.stop();
       };
+    } catch (error) {
+      console.error('[App] Error initializing Voice Assistant:', error);
     }
-
-    // Login page setup
-    if (pathname.includes('/login')) {
-      setTimeout(() => {
-        const inputs = document.querySelectorAll('input');
-
-        // Find inputs by type
-        let emailInput = null;
-        let passwordInput = null;
-
-        inputs.forEach(input => {
-          if (input.type === 'email' && !emailInput) {
-            emailInput = input;
-          } else if (input.type === 'password' && !passwordInput) {
-            passwordInput = input;
-          }
-        });
-
-        if (emailInput || passwordInput) {
-          loginHandler.registerFormFields({
-            emailInput,
-            passwordInput,
-          });
-          console.log('[App] Login form fields registered');
-        }
-      }, 300);
-
-      return () => {
-        loginHandler.unregisterFormFields();
-        console.log('[App] Login form fields unregistered');
-      };
-    }
-  }, [location.pathname]);
-
+  }, [navigate]);
   return (
     <SocketProvider>
       <div className="App">
