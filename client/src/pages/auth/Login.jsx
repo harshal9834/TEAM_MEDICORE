@@ -1,13 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
+import loginHandler from '../../utils/voice/loginHandler';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const setAuth = useAuthStore(state => state.setAuth);
+
+  // Create refs for form fields (for voice assistant)
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
+  // Register form fields with voice handler on mount
+  useEffect(() => {
+    if (emailInputRef.current && passwordInputRef.current) {
+      loginHandler.registerFormFields({
+        emailInput: emailInputRef.current,
+        passwordInput: passwordInputRef.current,
+        setFormData: setFormData  // ✅ Pass state setter to update React state
+      });
+      console.log('[Login] Form fields registered with voice handler');
+    }
+
+    // Cleanup: unregister form fields when component unmounts
+    return () => {
+      loginHandler.unregisterFormFields();
+      console.log('[Login] Form fields unregistered from voice handler');
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +67,7 @@ const Login = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">Email</label>
             <input
+              ref={emailInputRef}
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -54,6 +78,7 @@ const Login = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">Password</label>
             <input
+              ref={passwordInputRef}
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}

@@ -1,8 +1,18 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from './store/authStore';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
 import './i18n'; // Initialize i18n
+
+// Voice Assistant Components
+import VoiceButton from './components/VoiceButton';
+import speechEngine from './utils/voice/speechEngine';
+import registrationHandler from './utils/voice/registrationHandler';
+import loginHandler from './utils/voice/loginHandler';
+import navigationHandler from './utils/voice/navigationHandler';
+import featureScanner from './utils/voice/featureScanner';
+import languageSupport from './utils/voice/languageSupport';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -76,6 +86,183 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 function App() {
   const { isAuthenticated, user } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentPage, setCurrentPage] = useState('home');
+
+  /**
+   * Initialize voice assistant system
+   */
+  useEffect(() => {
+    try {
+      // Initialize speech engine
+      if (!speechEngine.recognition) {
+        console.warn('[App] Speech Recognition not available in this browser');
+        return;
+      }
+
+      console.log('[App] Initializing Voice Assistant System...');
+
+      // Set default language
+      languageSupport.setLanguage('en-IN');
+      speechEngine.setLanguage('en-IN');
+
+      // Set navigation callback for navigationHandler
+      navigationHandler.setNavigateCallback((route) => {
+        console.log('[App] Navigating to:', route);
+        navigate(route);
+      });
+
+      // Initialize feature scanner to auto-detect navigation links
+      featureScanner.scanFeatures();
+      console.log('[App] Feature Scanner initialized with', featureScanner.getFeatures().length, 'features');
+
+      // Setup master transcript listener
+      const handleMasterTranscript = (data) => {
+        if (!data.isFinal) return;
+
+        const transcript = data.transcript.toLowerCase();
+        console.log('[App] Voice Input:', transcript);
+
+        // Determine current page based on URL
+        const pathname = location.pathname;
+        let pageType = 'navigation';
+
+        if (pathname.includes('/register')) {
+          pageType = 'registration';
+        } else if (pathname.includes('/login')) {
+          pageType = 'login';
+        }
+
+        // Route to appropriate handler
+        try {
+          if (pageType === 'registration') {
+            registrationHandler.handleTranscript(transcript);
+          } else if (pageType === 'login') {
+            loginHandler.handleTranscript(transcript);
+          } else {
+            // Default to navigation
+            navigationHandler.handleCommand(transcript);
+          }
+        } catch (error) {
+          console.error('[App] Error routing voice input:', error);
+        }
+      };
+
+      speechEngine.onTranscript(handleMasterTranscript);
+
+      console.log('[App] Voice Assistant System initialized successfully');
+
+      // Cleanup on unmount
+      return () => {
+        console.log('[App] Cleaning up Voice Assistant System');
+        speechEngine.stop();
+      };
+    } catch (error) {
+      console.error('[App] Error initializing Voice Assistant:', error);
+    }
+  }, [navigate]);
+
+  /**
+   * Update feature scanner when route changes
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    // Update current page type
+    const pathname = location.pathname;
+    if (pathname.includes('/register')) {
+      setCurrentPage('registration');
+    } else if (pathname.includes('/login')) {
+      setCurrentPage('login');
+    } else {
+      setCurrentPage('home');
+    }
+
+    // Rescan features after navigation
+    setTimeout(() => {
+      featureScanner.rescan();
+      console.log('[App] Features rescanned after navigation');
+    }, 500);
+  }, [location.pathname]);
+
+  /**
+   * Register/unregister form fields based on current page
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const pathname = location.pathname;
+
+    // Registration page setup
+    if (pathname.includes('/register')) {
+      setTimeout(() => {
+        // Get all inputs on the page
+        const inputs = document.querySelectorAll('input');
+        const select = document.querySelector('select');
+
+        // Find inputs by type or order
+        let nameInput = null;
+        let emailInput = null;
+        let passwordInput = null;
+
+        inputs.forEach(input => {
+          if (input.type === 'text' && !nameInput) {
+            nameInput = input; // First text input is name
+          } else if (input.type === 'email' && !emailInput) {
+            emailInput = input;
+          } else if (input.type === 'password' && !passwordInput) {
+            passwordInput = input;
+          }
+        });
+
+        if (nameInput || emailInput || passwordInput || select) {
+          registrationHandler.registerFormFields({
+            nameInput,
+            emailInput,
+            passwordInput,
+            sectionSelect: select,
+          });
+          console.log('[App] Registration form fields registered');
+        }
+      }, 300);
+
+      return () => {
+        registrationHandler.unregisterFormFields();
+        console.log('[App] Registration form fields unregistered');
+      };
+    }
+
+    // Login page setup
+    if (pathname.includes('/login')) {
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('input');
+
+        // Find inputs by type
+        let emailInput = null;
+        let passwordInput = null;
+
+        inputs.forEach(input => {
+          if (input.type === 'email' && !emailInput) {
+            emailInput = input;
+          } else if (input.type === 'password' && !passwordInput) {
+            passwordInput = input;
+          }
+        });
+
+        if (emailInput || passwordInput) {
+          loginHandler.registerFormFields({
+            emailInput,
+            passwordInput,
+          });
+          console.log('[App] Login form fields registered');
+        }
+      }, 300);
+
+      return () => {
+        loginHandler.unregisterFormFields();
+        console.log('[App] Login form fields unregistered');
+      };
+    }
+  }, [location.pathname]);
 
   return (
     <SocketProvider>
@@ -369,6 +556,9 @@ function App() {
               <path className="grass-front" d="M0,100 C250,100 450,80 650,100 C850,120 950,90 1000,100 L1000,120 L0,120 Z" />
             </svg>
           </div>
+
+          {/* Voice Button Component */}
+          <VoiceButton navigate={navigate} currentPage={currentPage} />
         </div>
       </div>
     </SocketProvider>

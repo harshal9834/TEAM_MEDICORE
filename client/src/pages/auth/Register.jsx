@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 import api from '../../utils/api';
+import registrationHandler from '../../utils/voice/registrationHandler';
 
 const Register = () => {
   const { t, i18n } = useTranslation();
@@ -18,6 +19,32 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Create refs for form fields (for voice assistant)
+  const nameInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const sectionSelectRef = useRef(null);
+
+  // Register form fields with voice handler on mount
+  useEffect(() => {
+    if (nameInputRef.current && emailInputRef.current && passwordInputRef.current && sectionSelectRef.current) {
+      registrationHandler.registerFormFields({
+        nameInput: nameInputRef.current,
+        emailInput: emailInputRef.current,
+        passwordInput: passwordInputRef.current,
+        sectionSelect: sectionSelectRef.current,
+        setFormData: setFormData  // ✅ Pass state setter to update React state
+      });
+      console.log('[Register] Form fields registered with voice handler');
+    }
+
+    // Cleanup: unregister form fields when component unmounts
+    return () => {
+      registrationHandler.unregisterFormFields();
+      console.log('[Register] Form fields unregistered from voice handler');
+    };
+  }, []);
 
   // Set language if it was selected in the previous step
   useEffect(() => {
@@ -52,6 +79,7 @@ const Register = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">{t('auth.name')}</label>
             <input
+              ref={nameInputRef}
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -62,6 +90,7 @@ const Register = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">{t('auth.email')}</label>
             <input
+              ref={emailInputRef}
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -72,6 +101,7 @@ const Register = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">{t('auth.password')}</label>
             <input
+              ref={passwordInputRef}
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -82,6 +112,7 @@ const Register = () => {
           <div>
             <label className="block text-gray-700 font-semibold mb-2">{t('auth.role')}</label>
             <select
+              ref={sectionSelectRef}
               value={formData.role}
               onChange={(e) => setFormData({...formData, role: e.target.value})}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:outline-none transition-colors"
