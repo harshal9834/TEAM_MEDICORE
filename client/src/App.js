@@ -166,7 +166,6 @@ function App() {
   /**
    * Update feature scanner when route changes
    */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Update current page type
     const pathname = location.pathname;
