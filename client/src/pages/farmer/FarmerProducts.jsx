@@ -86,18 +86,18 @@ const FarmerProducts = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       if (!user?._id) {
         console.log('❌ No user ID available');
         setLoading(false);
         return;
       }
-      
+
       console.log('🔍 Fetching products for user:', user._id);
-      
+
       const response = await productsAPI.getAll({ seller: user._id });
       console.log('📦 Products response:', response.data);
-      
+
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('❌ Error fetching products:', error);
@@ -140,7 +140,7 @@ const FarmerProducts = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedImages(files);
-    
+
     // Create preview URLs
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreview(previews);
@@ -149,7 +149,7 @@ const FarmerProducts = () => {
   const handleVideoChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedVideos(files);
-    
+
     // Create preview URLs
     const previews = files.map(file => URL.createObjectURL(file));
     setVideoPreview(previews);
@@ -157,7 +157,7 @@ const FarmerProducts = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    
+
     if (!newProduct.name || !newProduct.price || !newProduct.quantity) {
       alert('Please fill in all required fields');
       return;
@@ -165,7 +165,7 @@ const FarmerProducts = () => {
 
     try {
       setLoading(true);
-      
+
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('name', newProduct.name);
@@ -174,12 +174,12 @@ const FarmerProducts = () => {
       formData.append('unit', newProduct.unit);
       formData.append('quantity', newProduct.quantity);
       formData.append('description', newProduct.description);
-      
+
       // Add images
       selectedImages.forEach(image => {
         formData.append('images', image);
       });
-      
+
       // Add videos
       selectedVideos.forEach(video => {
         formData.append('videos', video);
@@ -215,13 +215,13 @@ const FarmerProducts = () => {
       setSelectedVideos([]);
       setImagePreview([]);
       setVideoPreview([]);
-      
+
       // Clean up preview URLs
       imagePreview.forEach(url => URL.revokeObjectURL(url));
       videoPreview.forEach(url => URL.revokeObjectURL(url));
-      
+
       alert('Product added successfully!');
-      
+
       // Refresh products list
       fetchProducts();
     } catch (error) {
@@ -237,12 +237,12 @@ const FarmerProducts = () => {
       try {
         setLoading(true);
         console.log('🗑️ Deleting product:', id);
-        
+
         await productsAPI.delete(id);
         console.log('✅ Product deleted successfully');
-        
+
         alert('Product deleted successfully!');
-        
+
         // Refresh products list
         fetchProducts();
       } catch (error) {
@@ -300,7 +300,7 @@ const FarmerProducts = () => {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             {error}
-            <button 
+            <button
               onClick={fetchProducts}
               className="ml-2 underline hover:no-underline"
             >
@@ -367,11 +367,10 @@ const FarmerProducts = () => {
                 <button
                   key={category.id}
                   onClick={() => setActiveTab(category.id)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center ${
-                    activeTab === category.id
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center ${activeTab === category.id
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   <i className={`fas ${category.icon} mr-2`}></i>
                   {category.name}
@@ -396,18 +395,25 @@ const FarmerProducts = () => {
               const status = getProductStatus(product);
               return (
                 <div key={product._id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
-                  <div className="h-48 bg-gray-200 flex items-center justify-center">
+                  <div className="h-48 bg-gray-200 flex items-center justify-center relative">
                     {product.images && product.images.length > 0 ? (
-                      <img 
-                        src={`http://localhost:5000${product.images[0].url}`} 
+                      <img
+                        src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                          // Only fallback once to prevent infinite loops
+                          if (!e.target.dataset.fallbackAttempted) {
+                            e.target.dataset.fallbackAttempted = 'true';
+                            e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                          }
                         }}
                       />
                     ) : (
-                      <i className="fas fa-image text-4xl text-gray-400"></i>
+                      <div className="flex flex-col items-center justify-center">
+                        <i className="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                        <span className="text-xs text-gray-500">No Image</span>
+                      </div>
                     )}
                   </div>
                   <div className="p-4">
@@ -443,7 +449,7 @@ const FarmerProducts = () => {
                         <i className="fas fa-edit mr-1"></i>
                         Edit
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteProduct(product._id)}
                         className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
                         disabled={loading}
@@ -464,8 +470,8 @@ const FarmerProducts = () => {
             <i className="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
             <h3 className="text-xl font-medium text-gray-600 mb-2">No products found</h3>
             <p className="text-gray-500 mb-4">
-              {searchTerm || activeTab !== 'all' 
-                ? 'Try adjusting your search or filters' 
+              {searchTerm || activeTab !== 'all'
+                ? 'Try adjusting your search or filters'
                 : 'Add your first product to get started'
               }
             </p>
@@ -498,7 +504,7 @@ const FarmerProducts = () => {
                   <i className="fas fa-times text-xl"></i>
                 </button>
               </div>
-              
+
               <form onSubmit={handleAddProduct} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -507,7 +513,7 @@ const FarmerProducts = () => {
                   <input
                     type="text"
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="e.g., Fresh Tomatoes"
                     required
@@ -518,7 +524,7 @@ const FarmerProducts = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     <option value="vegetables">Vegetables</option>
@@ -543,7 +549,7 @@ const FarmerProducts = () => {
                     <input
                       type="number"
                       value={newProduct.price}
-                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       placeholder="₹"
                       required
@@ -553,7 +559,7 @@ const FarmerProducts = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
                     <select
                       value={newProduct.unit}
-                      onChange={(e) => setNewProduct({...newProduct, unit: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       <option value="kg">kg</option>
@@ -573,7 +579,7 @@ const FarmerProducts = () => {
                   <input
                     type="number"
                     value={newProduct.quantity}
-                    onChange={(e) => setNewProduct({...newProduct, quantity: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Available quantity"
                     required
@@ -584,7 +590,7 @@ const FarmerProducts = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     value={newProduct.description}
-                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-vertical"
                     rows="3"
                     placeholder="Product description..."

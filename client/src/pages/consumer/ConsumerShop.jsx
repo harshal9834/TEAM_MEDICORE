@@ -157,13 +157,13 @@ const ConsumerShop = () => {
   };
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'All' || 
+
+    const matchesCategory = selectedCategory === 'All' ||
       product.category?.toLowerCase() === selectedCategory.toLowerCase();
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -239,26 +239,24 @@ const ConsumerShop = () => {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`p-4 rounded-lg text-center shadow hover:shadow-lg flex flex-col items-center transition-all transform hover:scale-105 ${
-                selectedCategory === category
-                  ? 'bg-green-50 shadow-lg ring-2 ring-green-500'
-                  : 'bg-white'
-              }`}
+              className={`p-4 rounded-lg text-center shadow hover:shadow-lg flex flex-col items-center transition-all transform hover:scale-105 ${selectedCategory === category
+                ? 'bg-green-50 shadow-lg ring-2 ring-green-500'
+                : 'bg-white'
+                }`}
             >
               <div className="text-3xl mb-2">
                 <i
-                  className={`fas ${
-                    category === 'All' ? 'fa-th text-blue-600' :
+                  className={`fas ${category === 'All' ? 'fa-th text-blue-600' :
                     category === 'Millets' ? 'fa-wheat-awn text-orange-600' :
-                    category === 'Vegetables' ? 'fa-carrot text-green-600' :
-                    category === 'Fruits' ? 'fa-apple-alt text-red-600' :
-                    category === 'Grains' ? 'fa-seedling text-yellow-600' :
-                    category === 'Pulses' ? 'fa-bowl-food text-amber-600' :
-                    category === 'Cereals' ? 'fa-wheat text-yellow-700' :
-                    category === 'Dairy' ? 'fa-cheese text-yellow-500' :
-                    category === 'Spices' ? 'fa-pepper-hot text-red-700' :
-                    'fa-box text-gray-600'
-                  }`}
+                      category === 'Vegetables' ? 'fa-carrot text-green-600' :
+                        category === 'Fruits' ? 'fa-apple-alt text-red-600' :
+                          category === 'Grains' ? 'fa-seedling text-yellow-600' :
+                            category === 'Pulses' ? 'fa-bowl-food text-amber-600' :
+                              category === 'Cereals' ? 'fa-wheat text-yellow-700' :
+                                category === 'Dairy' ? 'fa-cheese text-yellow-500' :
+                                  category === 'Spices' ? 'fa-pepper-hot text-red-700' :
+                                    'fa-box text-gray-600'
+                    }`}
                 ></i>
               </div>
               <span className={`font-semibold ${selectedCategory === category ? 'text-green-700' : 'text-gray-700'}`}>
@@ -278,10 +276,10 @@ const ConsumerShop = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {filteredProducts.map((product, index) => {
               const rating = 4 + Math.random();
-              const imageUrl = product.images && product.images[0] 
-                ? `http://localhost:5000${product.images[0].url}`
+              const imageUrl = product.images && product.images[0]
+                ? (product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`)
                 : 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
-              
+
               return (
                 <div
                   key={product._id || index}
@@ -297,9 +295,8 @@ const ConsumerShop = () => {
                       }}
                     />
                     <div
-                      className={`absolute top-2 left-2 ${
-                        product.organic ? 'bg-yellow-500' : 'bg-green-600'
-                      } text-white text-xs px-2 py-1 rounded-full`}
+                      className={`absolute top-2 left-2 ${product.organic ? 'bg-yellow-500' : 'bg-green-600'
+                        } text-white text-xs px-2 py-1 rounded-full`}
                     >
                       {product.organic ? t('consumerShop.organic') : t('consumerShop.fresh')}
                     </div>
@@ -320,16 +317,24 @@ const ConsumerShop = () => {
                       <div className="text-yellow-500 flex">
                         {generateStars(rating)}
                       </div>
-                      <button
-                        onClick={() => addToCart({
-                          name: product.name,
-                          price: product.price,
-                          image: imageUrl
-                        })}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition-colors flex items-center"
-                      >
-                        <i className="fas fa-plus mr-1"></i> Add
-                      </button>
+                      <div className="flex gap-2">
+                        <Link
+                          to={`/product/${product._id || product.name}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition-colors text-xs flex items-center"
+                        >
+                          <i className="fas fa-eye mr-1"></i> View
+                        </Link>
+                        <button
+                          onClick={() => addToCart({
+                            name: product.name,
+                            price: product.price,
+                            image: imageUrl
+                          })}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition-colors flex items-center"
+                        >
+                          <i className="fas fa-plus mr-1"></i> Add
+                        </button>
+                      </div>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
                       <i className="fas fa-user mr-1"></i>
@@ -389,9 +394,8 @@ const ConsumerShop = () => {
 
       {/* Cart Sidebar */}
       <div
-        className={`fixed top-0 right-0 w-full md:w-1/3 bg-white h-full shadow-2xl p-6 z-50 transform transition-transform duration-300 ${
-          showCart ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 w-full md:w-1/3 bg-white h-full shadow-2xl p-6 z-50 transform transition-transform duration-300 ${showCart ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-green-700">
@@ -486,9 +490,8 @@ const ConsumerShop = () => {
       {/* Toast Notification */}
       {toast.show && (
         <div
-          className={`fixed bottom-20 right-20 px-6 py-3 rounded-lg text-white shadow-lg z-50 animate-slideIn ${
-            toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
-          }`}
+          className={`fixed bottom-20 right-20 px-6 py-3 rounded-lg text-white shadow-lg z-50 animate-slideIn ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
+            }`}
         >
           {toast.message}
         </div>

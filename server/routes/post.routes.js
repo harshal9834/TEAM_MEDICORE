@@ -3,19 +3,10 @@ const router = express.Router();
 const postController = require('../controllers/post.controller');
 const { protect } = require('../middleware/auth.middleware');
 const multer = require('multer');
-const path = require('path');
 
-// Configure multer for post images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'post-' + uniqueSuffix + ext);
-  }
-});
+// Configure multer with memory storage for Cloudinary upload
+// Files will be stored in memory as buffers, not on disk
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -27,14 +18,34 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit per file
   }
 });
 
-router.post('/', protect, upload.array('images', 4), postController.createPost);
+// Multer error handling middleware
+const handleMulterError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'File size too large. Maximum 10MB per file.' });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ message: 'Too many files. Maximum 4 images per post.' });
+    }
+    return res.status(400).json({ message: 'File upload error: ' + err.message });
+  } else if (err) {
+    return res.status(400).json({ message: err.message });
+  }
+  next();
+};
+
+// Routes
+router.post('/', protect, upload.array('images', 4), handleMulterError, postController.createPost);
 router.get('/', postController.getPosts);
 router.get('/:id', postController.getPostById);
+router.put('/:id', protect, upload.array('images', 4), handleMulterError, postController.updatePost);
 router.post('/:id/like', protect, postController.likePost);
 router.post('/:id/comment', protect, postController.commentPost);
+router.delete('/:id', protect, postController.deletePost);
 
 module.exports = router;
+

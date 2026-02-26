@@ -1,4 +1,5 @@
 const Product = require('../models/Product.model');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinaryService');
 const { emitProductAdded, emitProductUpdated, emitProductDeleted } = require('../utils/socket');
 
 // @desc    Get all products
@@ -25,7 +26,7 @@ exports.getAllProducts = async (req, res, next) => {
       }
     }
     if (status) query.status = status;
-    
+
     console.log('🔍 Product query:', query);
 
     const skip = (page - 1) * limit;
@@ -116,29 +117,46 @@ exports.createProduct = async (req, res, next) => {
     console.log('📝 Request files:', req.files);
 
     const productData = { ...req.body };
-    
+
     // Handle seller - use _id directly from the user document
     productData.seller = req.user._id;
     console.log('📝 Product data with seller:', { ...productData, seller: productData.seller });
 
-
-
-    // Handle images
-    if (req.files && req.files.images) {
-      productData.images = req.files.images.map(file => ({
-        url: `/uploads/products/${file.filename}`,
-        filename: file.filename
-      }));
-
+    // Handle images - upload to Cloudinary
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const uploadedImages = [];
+      for (const file of req.files.images) {
+        try {
+          console.log(`📤 Uploading product image (${file.originalname}) to Cloudinary...`);
+          const result = await uploadToCloudinary(file.buffer, 'products');
+          uploadedImages.push({
+            url: result.url,
+            publicId: result.public_id
+          });
+          console.log(`✅ Uploaded: ${result.url}`);
+        } catch (uploadError) {
+          console.error('❌ Failed to upload image to Cloudinary:', uploadError);
+          // Clean up already uploaded images on failure
+          for (const uploaded of uploadedImages) {
+            try {
+              await deleteFromCloudinary(uploaded.publicId);
+            } catch (cleanupError) {
+              console.error('❌ Failed to cleanup image:', cleanupError);
+            }
+          }
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to upload product images'
+          });
+        }
+      }
+      productData.images = uploadedImages;
     }
 
-    // Handle videos
+    // Handle videos (kept as local for now - videos stay in memory buffer but are not uploaded to Cloudinary)
     if (req.files && req.files.videos) {
-      productData.videos = req.files.videos.map(file => ({
-        url: `/uploads/products/${file.filename}`,
-        filename: file.filename
-      }));
-
+      console.log('⚠️ Video upload to Cloudinary not yet supported, skipping videos');
+      productData.videos = [];
     }
 
     const product = await Product.create(productData);
@@ -154,29 +172,6 @@ exports.createProduct = async (req, res, next) => {
     });
   } catch (error) {
     console.error('❌ Error creating product:', error.message);
-    
-    // Clean up uploaded files if product creation fails
-    if (req.files) {
-      const fs = require('fs');
-      const path = require('path');
-      
-      if (req.files.images) {
-        req.files.images.forEach(file => {
-          fs.unlink(path.join(__dirname, '../../uploads/products', file.filename), (err) => {
-            if (err) console.error('Error deleting file:', err);
-          });
-        });
-      }
-      
-      if (req.files.videos) {
-        req.files.videos.forEach(file => {
-          fs.unlink(path.join(__dirname, '../../uploads/products', file.filename), (err) => {
-            if (err) console.error('Error deleting file:', err);
-          });
-        });
-      }
-    }
-    
     next(error);
   }
 };
@@ -203,7 +198,41 @@ exports.updateProduct = async (req, res, next) => {
       });
     }
 
-    product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+
+    // Handle new images - upload to Cloudinary and delete old ones
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      // Delete old images from Cloudinary
+      if (product.images && product.images.length > 0) {
+        for (const image of product.images) {
+          if (image.publicId) {
+            try {
+              await deleteFromCloudinary(image.publicId);
+              console.log(`🗑️ Deleted old image: ${image.publicId}`);
+            } catch (deleteError) {
+              console.error('❌ Failed to delete old image from Cloudinary:', deleteError);
+            }
+          }
+        }
+      }
+
+      // Upload new images
+      const uploadedImages = [];
+      for (const file of req.files.images) {
+        try {
+          const result = await uploadToCloudinary(file.buffer, 'products');
+          uploadedImages.push({
+            url: result.url,
+            publicId: result.public_id
+          });
+        } catch (uploadError) {
+          console.error('❌ Failed to upload image during update:', uploadError);
+        }
+      }
+      updateData.images = uploadedImages;
+    }
+
+    product = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
     }).populate('seller', 'name avatar rating');
@@ -244,33 +273,21 @@ exports.deleteProduct = async (req, res, next) => {
     }
 
     const productId = product._id;
-    
-    // Delete associated files
-    const fs = require('fs');
-    const path = require('path');
-    
+
+    // Delete images from Cloudinary
     if (product.images && product.images.length > 0) {
-      product.images.forEach(image => {
-        if (image.filename) {
-          const filePath = path.join(__dirname, '../../uploads/products', image.filename);
-          fs.unlink(filePath, (err) => {
-            if (err) console.error('Error deleting image file:', err);
-          });
+      for (const image of product.images) {
+        if (image.publicId) {
+          try {
+            await deleteFromCloudinary(image.publicId);
+            console.log(`🗑️ Deleted product image from Cloudinary: ${image.publicId}`);
+          } catch (deleteError) {
+            console.error('❌ Failed to delete image from Cloudinary:', deleteError);
+          }
         }
-      });
+      }
     }
-    
-    if (product.videos && product.videos.length > 0) {
-      product.videos.forEach(video => {
-        if (video.filename) {
-          const filePath = path.join(__dirname, '../../uploads/products', video.filename);
-          fs.unlink(filePath, (err) => {
-            if (err) console.error('Error deleting video file:', err);
-          });
-        }
-      });
-    }
-    
+
     await product.deleteOne();
 
     // Emit real-time event for product deleted

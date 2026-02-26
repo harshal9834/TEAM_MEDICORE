@@ -4,11 +4,11 @@ import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const ConsumerProductList = () => {
-  const { user, isAuthenticated } = useAuthStore(state => ({ 
-    user: state.user, 
-    isAuthenticated: state.isAuthenticated 
+  const { user, isAuthenticated } = useAuthStore(state => ({
+    user: state.user,
+    isAuthenticated: state.isAuthenticated
   }));
-  
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -25,7 +25,7 @@ const ConsumerProductList = () => {
       setLoading(true);
       const response = await productsAPI.getAll();
       console.log('📦 Consumer products loaded:', response.data);
-      
+
       const products = response.data.products || [];
       setProducts(products);
     } catch (error) {
@@ -36,8 +36,8 @@ const ConsumerProductList = () => {
     }
   };
 
-  const filteredProducts = selectedCategory === 'All' 
-    ? products 
+  const filteredProducts = selectedCategory === 'All'
+    ? products
     : products.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase());
 
   const addToCart = (product) => {
@@ -112,11 +112,10 @@ const ConsumerProductList = () => {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === category
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
+                }`}
             >
               {category}
             </button>
@@ -132,23 +131,28 @@ const ConsumerProductList = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
-              <div 
-                key={product._id} 
+              <div
+                key={product._id}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >
-                <div className="h-48 bg-gray-200 overflow-hidden">
+                <div className="h-48 bg-gray-200 overflow-hidden relative">
                   {product.images && product.images[0] ? (
-                    <img 
-                      src={`http://localhost:5000${product.images[0].url}`}
+                    <img
+                      src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
                       alt={product.name}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
-                        e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                        // Only fallback once to prevent infinite loops
+                        if (!e.target.dataset.fallbackAttempted) {
+                          e.target.dataset.fallbackAttempted = 'true';
+                          e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                        }
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <i className="fas fa-image text-4xl text-gray-400"></i>
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                      <i className="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                      <span className="text-xs text-gray-500 text-center px-2">No Image</span>
                     </div>
                   )}
                 </div>
@@ -160,7 +164,7 @@ const ConsumerProductList = () => {
                     </span>
                   </div>
                   <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{product.description || 'No description'}</p>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Price:</span>
@@ -189,7 +193,7 @@ const ConsumerProductList = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => addToCart(product)}
                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
                       disabled={product.quantity === 0}
@@ -197,7 +201,7 @@ const ConsumerProductList = () => {
                       <i className="fas fa-cart-plus mr-1"></i>
                       {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                     </button>
-                    <button 
+                    <button
                       className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-300"
                     >
                       <i className="fas fa-heart"></i>

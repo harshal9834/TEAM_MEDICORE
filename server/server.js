@@ -30,6 +30,7 @@ const newsRoutes = require('./routes/news.routes');
 const marketPriceRoutes = require('./routes/marketPrice.routes');
 const wasteProductRoutes = require('./routes/wasteProduct.routes');
 const cottonDiseaseRoutes = require('./routes/cottonDisease.routes');
+const weatherRoutes = require('./routes/weather.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -124,6 +125,7 @@ app.use('/api/news', newsRoutes);
 app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/waste-products', wasteProductRoutes);
 app.use('/api/cotton', cottonDiseaseRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // ------------------
 // ❌ 404 Handler

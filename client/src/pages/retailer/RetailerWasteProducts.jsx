@@ -75,14 +75,14 @@ const RetailerWasteProducts = () => {
 
   const getFilteredProducts = () => {
     let filtered = wasteProducts.filter(product => {
-      const matchesSearch = 
+      const matchesSearch =
         (product.seller?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesCategory = activeCategory === 'all' || 
+
+      const matchesCategory = activeCategory === 'all' ||
         getCategoryFromName(product.category) === activeCategory ||
-        (activeCategory === 'oils-vegetables-more' && 
-         ['oils', 'vegetables', 'fruits', 'organic'].includes(getCategoryFromName(product.category)));
+        (activeCategory === 'oils-vegetables-more' &&
+          ['oils', 'vegetables', 'fruits', 'organic'].includes(getCategoryFromName(product.category)));
       const matchesVerified = !filters.verified || product.certified;
       const matchesOrganic = !filters.organic || product.organic;
 
@@ -121,7 +121,7 @@ const RetailerWasteProducts = () => {
   const getProductIcon = (category, name) => {
     const categoryType = getCategoryFromName(category);
     const productName = name?.toLowerCase() || '';
-    
+
     if (categoryType === 'oils' || productName.includes('oil')) return '🌻';
     if (categoryType === 'vegetables' || productName.includes('vegetable')) return '🥬';
     if (categoryType === 'fruits' || productName.includes('fruit')) return '🍎';
@@ -160,33 +160,30 @@ const RetailerWasteProducts = () => {
           <div className="space-y-3">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${
-                activeCategory === 'all' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${activeCategory === 'all'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               <i className="fas fa-th mr-2"></i>
               {t('retailerWaste.allProducts')}
             </button>
             <button
               onClick={() => setActiveCategory('oils-vegetables-more')}
-              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${
-                activeCategory === 'oils-vegetables-more' 
-                  ? 'bg-gradient-to-r from-orange-600 to-green-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${activeCategory === 'oils-vegetables-more'
+                ? 'bg-gradient-to-r from-orange-600 to-green-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               <span className="mr-2">♻️🌾</span>
               {t('retailerWaste.organicWaste')}
             </button>
             <button
               onClick={() => setActiveCategory('waste')}
-              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${
-                activeCategory === 'waste' 
-                  ? 'bg-amber-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`w-full p-3 rounded-xl text-left font-semibold transition-all ${activeCategory === 'waste'
+                ? 'bg-amber-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               <i className="fas fa-recycle mr-2"></i>
               {t('retailerWaste.agriculturalWaste')}
@@ -195,7 +192,7 @@ const RetailerWasteProducts = () => {
         </div>
 
         <hr className="my-6 border-gray-300" />
-        
+
         <div className="space-y-6">
           <label className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all cursor-pointer">
             <input
@@ -209,7 +206,7 @@ const RetailerWasteProducts = () => {
               <span className="font-semibold text-gray-700">{t('retailerWaste.verifiedFarmers')}</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -222,7 +219,7 @@ const RetailerWasteProducts = () => {
               <span className="font-semibold text-gray-700">{t('retailerWaste.organicProduce')}</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -235,7 +232,7 @@ const RetailerWasteProducts = () => {
               <span className="font-semibold text-gray-700">{t('retailerWaste.priceLowHigh')}</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -267,7 +264,7 @@ const RetailerWasteProducts = () => {
           <p className="text-sm text-gray-600">{t('retailerWaste.productsFound')}</p>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -303,7 +300,7 @@ const RetailerWasteProducts = () => {
             />
           </div>
         </div>
-        
+
         {/* Products Grid */}
         <div className="p-6 flex-grow overflow-auto">
           {loading ? (
@@ -323,8 +320,8 @@ const RetailerWasteProducts = () => {
                   {/* Product Image */}
                   <div className="h-48 bg-gray-200 overflow-hidden relative rounded-xl mb-4">
                     {product.images && product.images[0] ? (
-                      <img 
-                        src={`http://localhost:5000${product.images[0].url}`} 
+                      <img
+                        src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -349,32 +346,31 @@ const RetailerWasteProducts = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center justify-center mb-2">
                     <h3 className="text-xl font-bold text-green-700">{product.seller?.name || 'Unknown Farmer'}</h3>
                     {product.certified && (
                       <i className="fas fa-check-circle text-blue-500 ml-2" title="Certified Product"></i>
                     )}
                   </div>
-                  
+
                   <p className="text-green-600 font-bold text-lg">{product.name}</p>
                   <p className="text-green-600 font-bold text-2xl mb-2">₹{product.price}/{product.unit}</p>
                   <p className="text-sm text-gray-700 mb-4">{product.description || 'No description available'}</p>
-                  
+
                   <div className="mb-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                      getCategoryFromName(product.category) === 'oils' ? 'bg-orange-100 text-orange-800' :
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getCategoryFromName(product.category) === 'oils' ? 'bg-orange-100 text-orange-800' :
                       getCategoryFromName(product.category) === 'vegetables' ? 'bg-green-100 text-green-800' :
-                      getCategoryFromName(product.category) === 'fruits' ? 'bg-red-100 text-red-800' :
-                      'bg-amber-100 text-amber-800'
-                    }`}>
+                        getCategoryFromName(product.category) === 'fruits' ? 'bg-red-100 text-red-800' :
+                          'bg-amber-100 text-amber-800'
+                      }`}>
                       {product.category}
                     </span>
                     <div className="text-sm text-gray-600 mt-2">
                       Available: {product.quantity} {product.unit}
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col space-y-2 mt-4">
                     <button
                       onClick={() => alert(`Calling ${product.seller?.name || 'farmer'}...`)}

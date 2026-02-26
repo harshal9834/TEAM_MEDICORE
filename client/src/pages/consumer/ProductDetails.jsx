@@ -40,29 +40,34 @@ const ProductDetails = () => {
           <div className="md:flex">
             {/* Product Image */}
             <div className="md:w-1/2">
-              <div className="h-96 bg-gray-200">
+              <div className="h-96 bg-gray-200 relative">
                 {product.images && product.images[0] ? (
-                  <img 
-                    src={`http://localhost:5000${product.images[0].url}`}
+                  <img
+                    src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                      // Only fallback once to prevent infinite loops
+                      if (!e.target.dataset.fallbackAttempted) {
+                        e.target.dataset.fallbackAttempted = 'true';
+                        e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                      }
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <i className="fas fa-image text-6xl text-gray-400"></i>
+                  <div className="w-full h-full flex flex-col items-center justify-center">
+                    <i className="fas fa-image text-6xl text-gray-400 mb-2"></i>
+                    <span className="text-sm text-gray-500">No Image Available</span>
                   </div>
                 )}
               </div>
             </div>
-            
+
             {/* Product Details */}
             <div className="md:w-1/2 p-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">{product.name}</h1>
               <p className="text-gray-600 mb-6">{product.description}</p>
-              
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Price:</span>
@@ -97,8 +102,8 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              <button 
-                onClick={() => addToCart(product)} 
+              <button
+                onClick={() => addToCart(product)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors duration-300"
                 disabled={product.quantity === 0}
               >

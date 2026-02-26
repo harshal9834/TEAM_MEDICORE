@@ -252,19 +252,24 @@ const ConsumerListings = () => {
                 key={listing._id} 
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >
-                <div className="h-48 bg-gray-200 overflow-hidden">
+                <div className="h-48 bg-gray-200 overflow-hidden relative">
                   {listing.images && listing.images[0] ? (
                     <img 
                       src={`http://localhost:5000${listing.images[0].url}`}
                       alt={listing.name || 'Product'}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
-                        e.target.src = 'http://localhost:5000/image/dari.jpeg';
+                        // Only fallback once to prevent infinite loops
+                        if (!e.target.dataset.fallbackAttempted) {
+                          e.target.dataset.fallbackAttempted = 'true';
+                          e.target.src = 'http://localhost:5000/image/dari.jpeg';
+                        }
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <i className="fas fa-image text-4xl text-gray-400"></i>
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                      <i className="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                      <span className="text-xs text-gray-500">No Image</span>
                     </div>
                   )}
                 </div>

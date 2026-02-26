@@ -69,10 +69,10 @@ const RetailerProductsList = () => {
 
   const getFilteredProducts = () => {
     let filtered = products.filter(product => {
-      const matchesSearch = 
+      const matchesSearch =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.seller?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesVerified = !filters.verified || product.certified;
       const matchesOrganic = !filters.organic || product.organic;
 
@@ -146,7 +146,7 @@ const RetailerProductsList = () => {
               <span className="font-semibold text-gray-700">Certified Products</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -159,7 +159,7 @@ const RetailerProductsList = () => {
               <span className="font-semibold text-gray-700">Organic Products</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -172,7 +172,7 @@ const RetailerProductsList = () => {
               <span className="font-semibold text-gray-700">Price: Low to High</span>
             </div>
           </label>
-          
+
           <label className="flex items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all cursor-pointer">
             <input
               type="checkbox"
@@ -201,7 +201,7 @@ const RetailerProductsList = () => {
           <p className="text-sm text-gray-600">products found</p>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -237,7 +237,7 @@ const RetailerProductsList = () => {
             />
           </div>
         </div>
-        
+
         {/* Products Grid */}
         <div className="p-6 flex-grow overflow-auto">
           {loading ? (
@@ -265,8 +265,8 @@ const RetailerProductsList = () => {
                   {/* Product Image */}
                   <div className="h-48 bg-gray-200 overflow-hidden relative">
                     {product.images && product.images[0] ? (
-                      <img 
-                        src={`http://localhost:5000${product.images[0].url}`} 
+                      <img
+                        src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -300,9 +300,9 @@ const RetailerProductsList = () => {
                         {getCategoryDisplayName(product.category)}
                       </span>
                     </div>
-                    
+
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                    
+
                     <div className="flex items-center mb-3 text-sm text-gray-700">
                       <i className="fas fa-user text-blue-600 mr-2"></i>
                       <span className="font-semibold">{product.seller?.name || 'Unknown Farmer'}</span>
@@ -327,7 +327,7 @@ const RetailerProductsList = () => {
                         >
                           <i className="fas fa-phone mr-2"></i>
                           Call
-                      </button>
+                        </button>
                         <button
                           onClick={() => navigate('/chat')}
                           className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all font-semibold"
@@ -336,7 +336,7 @@ const RetailerProductsList = () => {
                           Chat
                         </button>
                       </div>
-                      
+
                       {/* Video Button - Only show if product has video */}
                       {product.video && product.video.url && (
                         <button

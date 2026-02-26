@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema({
   },
   images: [{
     url: String,
-    filename: String
+    publicId: String
   }],
   videos: [{
     url: String,

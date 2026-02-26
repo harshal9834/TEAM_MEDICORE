@@ -8,9 +8,9 @@ import toast from 'react-hot-toast';
 
 const AgricultureProducts = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuthStore(state => ({ 
-    user: state.user, 
-    isAuthenticated: state.isAuthenticated 
+  const { user, isAuthenticated } = useAuthStore(state => ({
+    user: state.user,
+    isAuthenticated: state.isAuthenticated
   }));
   const { socket } = useSocket();
   const [products, setProducts] = useState([]);
@@ -35,15 +35,15 @@ const AgricultureProducts = () => {
   const [uploading, setUploading] = useState(false);
 
   const categories = [
-    t('common.all') || 'All', 
-    t('categories.vegetables'), 
-    t('categories.fruits'), 
-    t('categories.grainsSpices'), 
-    t('categories.millets') || 'Millets', 
-    t('categories.cereals') || 'Cereals', 
-    t('categories.pulses'), 
-    t('categories.spices'), 
-    t('categories.dairy'), 
+    t('common.all') || 'All',
+    t('categories.vegetables'),
+    t('categories.fruits'),
+    t('categories.grainsSpices'),
+    t('categories.millets') || 'Millets',
+    t('categories.cereals') || 'Cereals',
+    t('categories.pulses'),
+    t('categories.spices'),
+    t('categories.dairy'),
     t('categories.other')
   ];
 
@@ -59,9 +59,9 @@ const AgricultureProducts = () => {
   }, [loading]);
 
   useEffect(() => {
-    console.log('🔄 useEffect triggered:', { 
-      isAuthenticated, 
-      userId: user?._id, 
+    console.log('🔄 useEffect triggered:', {
+      isAuthenticated,
+      userId: user?._id,
       userObject: user,
       timestamp: new Date().toISOString()
     });
@@ -82,7 +82,7 @@ const AgricultureProducts = () => {
   useEffect(() => {
     if (socket && socket.on && user?._id) {
       console.log('🔌 Setting up socket listeners for user:', user._id);
-      
+
       const handleProductAdded = (product) => {
         console.log('📦 Product added event:', product);
         if (product.seller._id === user._id) {
@@ -121,21 +121,21 @@ const AgricultureProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      
+
       if (!isAuthenticated || !user?._id) {
         console.log('❌ Not authenticated or no user ID:', { isAuthenticated, userId: user?._id });
         setLoading(false);
         return;
       }
-      
+
       console.log('🔍 Fetching products for user:', user._id);
       console.log('🔍 Making API call to:', `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/products?seller=${user._id}`);
-      
+
       const response = await productsAPI.getAll({ seller: user._id });
       console.log('📦 API Response status:', response.status);
       console.log('📦 API Response data:', response.data);
       console.log('📦 API Response headers:', response.headers);
-      
+
       const products = response.data.products || [];
       console.log('✅ Setting products:', products.length, 'products');
       console.log('📦 Products array:', products);
@@ -145,7 +145,7 @@ const AgricultureProducts = () => {
       console.error('❌ Error response:', error.response);
       console.error('❌ Error status:', error.response?.status);
       console.error('❌ Error data:', error.response?.data);
-      
+
       if (error.response?.status === 401) {
         toast.error('Authentication failed - please log in again');
         // Clear invalid auth data
@@ -160,15 +160,15 @@ const AgricultureProducts = () => {
     }
   };
 
-  const filteredProducts = selectedCategory === 'All' 
-    ? products 
+  const filteredProducts = selectedCategory === 'All'
+    ? products
     : products.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase());
 
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productsAPI.delete(id);
-        
+
         // Refresh the products list to remove the deleted product
         await fetchProducts();
         toast.success('Product deleted successfully!');
@@ -186,7 +186,7 @@ const AgricultureProducts = () => {
   // Handle image selection
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     const validFiles = files.filter(file => {
       const isValid = file.type.startsWith('image/');
       if (!isValid) {
@@ -214,7 +214,7 @@ const AgricultureProducts = () => {
   // Handle video selection
   const handleVideoChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     const validFiles = files.filter(file => {
       const isValid = file.type.startsWith('video/');
       if (!isValid) {
@@ -253,7 +253,7 @@ const AgricultureProducts = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    
+
     if (!newProduct.name || !newProduct.price || !newProduct.quantity) {
       toast.error('Please fill in all required fields');
       return;
@@ -288,13 +288,13 @@ const AgricultureProducts = () => {
       });
 
       const response = await productsAPI.create(formData);
-      
+
       // Add the new product directly to the state for immediate UI update
       if (response.data.product) {
         setProducts(prev => [response.data.product, ...prev]);
         console.log('✅ Product added to state immediately');
       }
-      
+
       // Refresh the list to ensure consistency with server
       setTimeout(async () => {
         try {
@@ -305,7 +305,7 @@ const AgricultureProducts = () => {
           // If refresh fails, at least we have the product in state from direct addition
         }
       }, 500);
-      
+
       setShowAddForm(false);
       setNewProduct({
         name: '',
@@ -321,7 +321,7 @@ const AgricultureProducts = () => {
       setSelectedVideos([]);
       setImagePreviews([]);
       setVideoPreviews([]);
-      
+
       toast.success('Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
@@ -401,11 +401,10 @@ const AgricultureProducts = () => {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === category
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
+                }`}
             >
               {category}
             </button>
@@ -469,84 +468,83 @@ const AgricultureProducts = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
-            <div 
-              key={product._id} 
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-            >
-              <div className="h-48 bg-gray-200 overflow-hidden">
-                {product.images && product.images[0] ? (
-                  <img 
-                    src={`http://localhost:5000${product.images[0].url}?t=${Date.now()}`}
-                    alt={product.name}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.src = `http://localhost:5000/image/dari.jpeg`;
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <i className="fas fa-image text-4xl text-gray-400"></i>
-                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                      No Image
+              <div
+                key={product._id}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+              >
+                <div className="h-48 bg-gray-200 overflow-hidden relative">
+                  {product.images && product.images[0] ? (
+                    <img
+                      src={product.images[0]?.url?.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0]?.url || ''}`}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        // Only fallback once to prevent infinite loops
+                        if (!e.target.dataset.fallbackAttempted) {
+                          e.target.dataset.fallbackAttempted = 'true';
+                          e.target.src = `http://localhost:5000/image/dari.jpeg`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center relative">
+                      <i className="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                      <span className="text-xs text-gray-500 text-center px-2">No Image Available</span>
                     </div>
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                      {product.name}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold text-gray-800">{product.name || 'Unnamed Product'}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(product.category)}`}>
-                    {product.category || 'Other'}
-                  </span>
+                  )}
                 </div>
-                <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{product.description || 'No description'}</p>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Price:</span>
-                    <span className="font-bold text-green-600">₹{product.price || 0}/{product.unit || 'unit'}</span>
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-gray-800">{product.name || 'Unnamed Product'}</h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(product.category)}`}>
+                      {product.category || 'Other'}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Available:</span>
-                    <span className="font-medium">{product.quantity || 0} {product.unit || 'unit'}</span>
-                  </div>
-                  <div className="flex gap-2 text-xs">
-                    {product.organic && (
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        <i className="fas fa-leaf mr-1"></i>Organic
-                      </span>
-                    )}
-                    {product.certified && (
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                        <i className="fas fa-certificate mr-1"></i>Certified
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{product.description || 'No description'}</p>
 
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleEditProduct(product)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
-                  >
-                    <i className="fas fa-edit mr-1"></i>
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteProduct(product._id)}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
-                  >
-                    <i className="fas fa-trash mr-1"></i>
-                    Delete
-                  </button>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Price:</span>
+                      <span className="font-bold text-green-600">₹{product.price || 0}/{product.unit || 'unit'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Available:</span>
+                      <span className="font-medium">{product.quantity || 0} {product.unit || 'unit'}</span>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      {product.organic && (
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          <i className="fas fa-leaf mr-1"></i>Organic
+                        </span>
+                      )}
+                      {product.certified && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          <i className="fas fa-certificate mr-1"></i>Certified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditProduct(product)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
+                    >
+                      <i className="fas fa-edit mr-1"></i>
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product._id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
+                    >
+                      <i className="fas fa-trash mr-1"></i>
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
 
         {!loading && filteredProducts.length === 0 && (
@@ -557,14 +555,14 @@ const AgricultureProducts = () => {
               <div className="space-y-4">
                 <p className="text-gray-500">You haven't added any products yet.</p>
                 <p className="text-sm text-blue-600">Click "Add Product" to get started!</p>
-                
+
                 <div className="mt-4 p-4 bg-blue-50 rounded-lg max-w-md mx-auto">
                   <p className="text-sm text-blue-800 mb-3">
                     <strong>Demo Tip:</strong> To see sample products, log in with:
                   </p>
                   <div className="bg-white p-3 rounded border">
                     <p className="text-sm">
-                      Email: <code className="bg-blue-100 px-2 py-1 rounded">farmer@demo.com</code><br/>
+                      Email: <code className="bg-blue-100 px-2 py-1 rounded">farmer@demo.com</code><br />
                       Password: <code className="bg-blue-100 px-2 py-1 rounded">demo123</code>
                     </p>
                   </div>
@@ -572,9 +570,9 @@ const AgricultureProducts = () => {
 
                 <div className="mt-4 p-4 bg-yellow-50 rounded-lg max-w-md mx-auto">
                   <p className="text-sm text-yellow-800 mb-3">
-                    <strong>Troubleshooting:</strong><br/>
-                    • Click "Debug" button to check your login status<br/>
-                    • Try "Refresh" to reload products<br/>
+                    <strong>Troubleshooting:</strong><br />
+                    • Click "Debug" button to check your login status<br />
+                    • Try "Refresh" to reload products<br />
                     • Check browser console for error messages
                   </p>
                   <button
@@ -613,7 +611,7 @@ const AgricultureProducts = () => {
                   <i className="fas fa-times text-xl"></i>
                 </button>
               </div>
-              
+
               <form onSubmit={handleAddProduct} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -622,7 +620,7 @@ const AgricultureProducts = () => {
                   <input
                     type="text"
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="e.g., Fresh Tomatoes"
                     required
@@ -633,7 +631,7 @@ const AgricultureProducts = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select
                     value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     <option value="vegetables">Vegetables</option>
@@ -656,7 +654,7 @@ const AgricultureProducts = () => {
                     <input
                       type="number"
                       value={newProduct.price}
-                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       placeholder="₹"
                       required
@@ -666,7 +664,7 @@ const AgricultureProducts = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
                     <select
                       value={newProduct.unit}
-                      onChange={(e) => setNewProduct({...newProduct, unit: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       <option value="kg">kg</option>
@@ -686,7 +684,7 @@ const AgricultureProducts = () => {
                   <input
                     type="number"
                     value={newProduct.quantity}
-                    onChange={(e) => setNewProduct({...newProduct, quantity: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Available quantity"
                     required
@@ -699,7 +697,7 @@ const AgricultureProducts = () => {
                     <i className="fas fa-images mr-2 text-blue-600"></i>
                     Product Images <span className="text-red-500">*</span> (Max 10)
                   </label>
-                  <input 
+                  <input
                     type="file"
                     accept="image/*"
                     multiple
@@ -707,14 +705,14 @@ const AgricultureProducts = () => {
                     className="w-full border-2 border-dashed border-gray-300 p-3 rounded-lg cursor-pointer hover:border-green-500 text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1">Supported: JPG, PNG, JPEG, GIF, WEBP</p>
-                  
+
                   {/* Image Previews */}
                   {imagePreviews.length > 0 && (
                     <div className="grid grid-cols-3 gap-2 mt-3">
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="relative">
-                          <img 
-                            src={preview} 
+                          <img
+                            src={preview}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-20 object-cover rounded-lg"
                           />
@@ -737,7 +735,7 @@ const AgricultureProducts = () => {
                     <i className="fas fa-video mr-2 text-red-600"></i>
                     Product Videos (Optional, Max 5)
                   </label>
-                  <input 
+                  <input
                     type="file"
                     accept="video/*"
                     multiple
@@ -745,13 +743,13 @@ const AgricultureProducts = () => {
                     className="w-full border-2 border-dashed border-gray-300 p-3 rounded-lg cursor-pointer hover:border-green-500 text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1">Supported: MP4, MOV, AVI, MKV, WEBM (Max 50MB each)</p>
-                  
+
                   {/* Video Previews */}
                   {videoPreviews.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 mt-3">
                       {videoPreviews.map((preview, index) => (
                         <div key={index} className="relative">
-                          <video 
+                          <video
                             src={preview}
                             className="w-full h-24 object-cover rounded-lg"
                             controls
@@ -773,7 +771,7 @@ const AgricultureProducts = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     value={newProduct.description}
-                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-vertical"
                     rows="3"
                     placeholder="Product description..."
@@ -783,10 +781,10 @@ const AgricultureProducts = () => {
                 {/* Checkboxes */}
                 <div className="flex gap-4">
                   <label className="flex items-center cursor-pointer">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={newProduct.organic}
-                      onChange={(e) => setNewProduct({...newProduct, organic: e.target.checked})}
+                      onChange={(e) => setNewProduct({ ...newProduct, organic: e.target.checked })}
                       className="mr-2 w-4 h-4"
                     />
                     <span className="text-sm text-gray-700">
@@ -794,10 +792,10 @@ const AgricultureProducts = () => {
                     </span>
                   </label>
                   <label className="flex items-center cursor-pointer">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={newProduct.certified}
-                      onChange={(e) => setNewProduct({...newProduct, certified: e.target.checked})}
+                      onChange={(e) => setNewProduct({ ...newProduct, certified: e.target.checked })}
                       className="mr-2 w-4 h-4"
                     />
                     <span className="text-sm text-gray-700">

@@ -49,13 +49,16 @@ export const productsAPI = {
   getOne: (id) => api.get(`/products/${id}`),
   create: (data) => {
     // Handle FormData for file uploads
-    const config = {};
+    // Must set Content-Type to undefined so axios removes the default 'application/json'
+    // and lets the browser set 'multipart/form-data' with proper boundary
     if (data instanceof FormData) {
-      config.headers = {
-        'Content-Type': 'multipart/form-data',
-      };
+      return api.post('/products', data, {
+        headers: {
+          'Content-Type': undefined
+        }
+      });
     }
-    return api.post('/products', data, config);
+    return api.post('/products', data);
   },
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
@@ -95,14 +98,25 @@ export const postsAPI = {
   getAll: (params) => api.get('/posts', { params }),
   create: (data) => {
     // Handle FormData for file uploads
-    const config = {};
     if (data instanceof FormData) {
-      config.headers = {
-        'Content-Type': 'multipart/form-data',
-      };
+      // Must set Content-Type to undefined so axios removes 'application/json' default
+      return api.post('/posts', data, {
+        headers: {
+          'Content-Type': undefined
+        }
+      });
     }
-    return api.post('/posts', data, config);
+    return api.post('/posts', data);
   },
+  getById: (id) => api.get(`/posts/${id}`),
+  update: (id, data) => {
+    // Handle FormData for file uploads
+    if (data instanceof FormData) {
+      return api.put(`/posts/${id}`, data);
+    }
+    return api.put(`/posts/${id}`, data);
+  },
+  delete: (id) => api.delete(`/posts/${id}`),
   like: (id) => api.post(`/posts/${id}/like`),
   comment: (id, text) => api.post(`/posts/${id}/comment`, { text }),
 };

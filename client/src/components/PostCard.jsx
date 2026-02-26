@@ -109,17 +109,28 @@ const PostCard = ({ post, onPostUpdate }) => {
         {/* Post Images */}
         {post.images && post.images.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
-            {post.images.map((image, index) => (
-              <img
-                key={index}
-                src={`http://localhost:5000${image.url}`}
-                alt={`Post image ${index + 1}`}
-                className="w-full h-48 object-cover rounded-lg"
-                onError={(e) => {
-                  e.target.src = 'http://localhost:5000/image/post1.jpeg';
-                }}
-              />
-            ))}
+            {post.images.map((image, index) => {
+              // Check if image.url is already a full URL (Cloudinary) or local path
+              const imageUrl = image.url.startsWith('http') 
+                ? image.url 
+                : `http://localhost:5000${image.url}`;
+              
+              return (
+                <img
+                  key={index}
+                  src={imageUrl}
+                  alt={`Post image ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-lg"
+                  onError={(e) => {
+                    // Only fallback once to prevent infinite loops
+                    if (!e.target.dataset.fallbackAttempted) {
+                      e.target.dataset.fallbackAttempted = 'true';
+                      e.target.src = 'http://localhost:5000/image/post1.jpeg';
+                    }
+                  }}
+                />
+              );
+            })}
           </div>
         )}
       </div>

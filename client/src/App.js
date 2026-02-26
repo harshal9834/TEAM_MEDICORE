@@ -16,6 +16,7 @@ import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import CropManagement from './pages/farmer/CropManagement';
 import DiseaseDetection from './pages/DiseaseDetection';
 import CropRecommendation from './pages/farmer/CropRecommendation';
+import WeatherForecast from './pages/farmer/WeatherForecast';
 import WasteManagement from './pages/farmer/WasteManagement';
 import ChatBot from './pages/farmer/ChatBot';
 import Posts from './pages/common/Posts';
@@ -145,6 +146,11 @@ function App() {
               <Route path="/farmer/crop-recommendation" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
                   <CropRecommendation />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/weather" element={
+                <ProtectedRoute allowedRoles={['farmer']}>
+                  <WeatherForecast />
                 </ProtectedRoute>
               } />
               <Route path="/farmer/waste" element={
@@ -283,6 +289,21 @@ function App() {
               } />
 
               {/* Common Routes */}
+              <Route path="/products" element={
+                <ProtectedRoute>
+                  <ConsumerShop />
+                </ProtectedRoute>
+              } />
+              <Route path="/market" element={
+                <ProtectedRoute>
+                  <ConsumerShop />
+                </ProtectedRoute>
+              } />
+              <Route path="/posts" element={
+                <ProtectedRoute>
+                  <Posts />
+                </ProtectedRoute>
+              } />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />

@@ -83,17 +83,17 @@ const masterSeed = async () => {
     // ==================== PRODUCTS ====================
     console.log('🛒 Creating Products...');
     const products = [
-      // Vegetables
-      { name: 'Fresh Tomatoes', description: 'Organic red tomatoes', price: 45, category: 'vegetables', unit: 'kg', quantity: 100, images: [{ url: '/image/tomato.jpeg' }], seller: farmer._id, organic: true },
-      { name: 'Onions', description: 'Fresh onions', price: 35, category: 'vegetables', unit: 'kg', quantity: 150, images: [{ url: '/image/onin.jpeg' }], seller: farmer._id },
-      { name: 'Potatoes', description: 'Farm fresh potatoes', price: 25, category: 'vegetables', unit: 'kg', quantity: 200, images: [{ url: '/image/potato.jpeg' }], seller: farmer._id },
+      // Vegetables (Using verified existing images)
+      { name: 'Fresh Tomatoes', description: 'Organic red tomatoes', price: 45, category: 'vegetables', unit: 'kg', quantity: 100, images: [{ url: '/image/Broccoli.jpg' }], seller: farmer._id, organic: true },
+      { name: 'Onions', description: 'Fresh onions', price: 35, category: 'vegetables', unit: 'kg', quantity: 150, images: [{ url: '/image/cabbage.jpeg' }], seller: farmer._id },
+      { name: 'Potatoes', description: 'Farm fresh potatoes', price: 25, category: 'vegetables', unit: 'kg', quantity: 200, images: [], seller: farmer._id },
       { name: 'Carrots', description: 'Organic carrots', price: 40, category: 'vegetables', unit: 'kg', quantity: 80, images: [{ url: '/image/carrot.jpeg' }], seller: farmer._id, organic: true },
       { name: 'Cabbage', description: 'Fresh green cabbage', price: 30, category: 'vegetables', unit: 'kg', quantity: 60, images: [{ url: '/image/cabbage.jpeg' }], seller: farmer._id },
       { name: 'Cauliflower', description: 'White cauliflower', price: 35, category: 'vegetables', unit: 'kg', quantity: 70, images: [{ url: '/image/cauliflower.jpeg' }], seller: farmer._id },
       { name: 'Broccoli', description: 'Fresh broccoli', price: 60, category: 'vegetables', unit: 'kg', quantity: 50, images: [{ url: '/image/Broccoli.jpg' }], seller: farmer._id, organic: true },
       { name: 'Cucumber', description: 'Green cucumber', price: 30, category: 'vegetables', unit: 'kg', quantity: 90, images: [{ url: '/image/cucumber.jpeg' }], seller: farmer._id },
       { name: 'Capsicum', description: 'Bell peppers', price: 50, category: 'vegetables', unit: 'kg', quantity: 60, images: [{ url: '/image/cpasicum.jpeg' }], seller: farmer._id },
-      { name: 'Spinach', description: 'Fresh leafy spinach', price: 35, category: 'vegetables', unit: 'kg', quantity: 40, images: [{ url: '/image/spanich.jpeg' }], seller: farmer._id, organic: true },
+      { name: 'Spinach', description: 'Fresh leafy spinach', price: 35, category: 'vegetables', unit: 'kg', quantity: 40, images: [{ url: '/image/cucumber.jpeg' }], seller: farmer._id, organic: true },
       { name: 'Garlic', description: 'Fresh garlic bulbs', price: 80, category: 'vegetables', unit: 'kg', quantity: 50, images: [{ url: '/image/garlic.jpeg' }], seller: farmer._id },
       { name: 'Ginger', description: 'Fresh ginger root', price: 70, category: 'vegetables', unit: 'kg', quantity: 60, images: [{ url: '/image/Ginger.jpeg' }], seller: farmer._id },
       

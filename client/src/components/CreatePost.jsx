@@ -72,10 +72,13 @@ const CreatePost = ({ onPostCreated }) => {
         formData.append('images', image);
       });
 
+      console.log('📤 Submitting post with', selectedImages.length, 'images...');
       const response = await postsAPI.create(formData);
       
+      console.log('✅ Post created successfully:', response.data);
+      
       if (onPostCreated) {
-        onPostCreated(response.data);
+        onPostCreated(response.data.post || response.data);
       }
       
       // Reset form
@@ -86,8 +89,15 @@ const CreatePost = ({ onPostCreated }) => {
       
       toast.success('Post created successfully!');
     } catch (error) {
-      console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      console.error('❌ Error creating post:', error);
+      
+      // Display specific error message from server
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to create post';
+      
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

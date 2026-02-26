@@ -11,7 +11,7 @@ router.get('/:id', productController.getProduct);
 router.use(protect); // All routes below require authentication
 
 router.post('/', authorize('farmer', 'retailer'), uploadProductFiles, productController.createProduct);
-router.put('/:id', authorize('farmer', 'retailer'), productController.updateProduct);
+router.put('/:id', authorize('farmer', 'retailer'), uploadProductFiles, productController.updateProduct);
 router.delete('/:id', authorize('farmer', 'retailer'), productController.deleteProduct);
 router.post('/:id/review', productController.addReview);
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
+import WeatherWidget from '../../components/WeatherWidget';
 
 const FarmerDashboard = () => {
   const { t } = useTranslation();
@@ -85,22 +86,9 @@ const FarmerDashboard = () => {
         </div>
       </header>
 
-      {/* Weather Card */}
-      <div className="container mx-auto px-4 mt-6">
-        <div className="card flex items-center justify-between mb-8 border border-[#E8F5E9]/50">
-          <div className="flex items-center">
-            <div className="bg-[#FFF8E1] p-4 rounded-full mr-5 shadow-sm">
-              <i className="fas fa-cloud-sun text-4xl text-[#FFB300]"></i>
-            </div>
-            <div>
-              <h3 className="font-extrabold text-xl text-[#2E7D32] tracking-tight">Today's Weather</h3>
-              <p className="text-[#666] font-medium mt-1">Sunny, 28°C <span className="opacity-50 mx-1">|</span> Perfect for harvesting</p>
-            </div>
-          </div>
-          <button className="hidden md:block btn-secondary">
-            View Forecast <i className="fas fa-chevron-right ml-2 text-sm"></i>
-          </button>
-        </div>
+      {/* Weather Widget */}
+      <div className="container mx-auto px-4 mt-6 mb-8">
+        <WeatherWidget />
       </div>
 
       {/* Main Content */}
