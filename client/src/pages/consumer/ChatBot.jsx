@@ -11,8 +11,6 @@ const ChatBot = () => {
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
   const messagesEndRef = useRef(null);
 
   const quickQuestions = [
@@ -42,8 +40,6 @@ const ChatBot = () => {
       
       setMessages(prev => [...prev, userMessage]);
       setInputMessage('');
-      setIsTyping(true);
-      setShowQuickQuestions(false);
       
       setTimeout(() => {
         const botResponse = getBotResponse(inputMessage);
@@ -53,7 +49,6 @@ const ChatBot = () => {
           timestamp: new Date() 
         };
         setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
       }, 1500 + Math.random() * 1000);
     }
   };
@@ -99,8 +94,6 @@ const ChatBot = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
-    setIsTyping(true);
-    setShowQuickQuestions(false);
     
     setTimeout(() => {
       const botResponse = getBotResponse(question.text);
@@ -110,16 +103,7 @@ const ChatBot = () => {
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
     }, 1500);
-  };
-
-  const formatTime = (timestamp) => {
-    return timestamp.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
   };
 
   return (

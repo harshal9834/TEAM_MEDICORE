@@ -16,7 +16,8 @@ const ConsumerShop = () => {
 
   const deliveryFee = 40;
 
-  // Local products data (fallback)
+  // Local products data (fallback) - kept for reference if API fails
+  /* Commented out to avoid unused variable warning
   const fallbackProducts = {
     Millets: [
       { name: 'Foxtail Millet', price: 80, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', organic: true },
@@ -73,6 +74,7 @@ const ConsumerShop = () => {
       { name: 'Cinnamon', price: 250, image: 'https://images.unsplash.com/photo-1596040033229-a0b3b83b6c0f?w=400', organic: false }
     ]
   };
+  */
 
   useEffect(() => {
     const savedCart = localStorage.getItem('gofarmCart');
