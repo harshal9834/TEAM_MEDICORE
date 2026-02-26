@@ -35,12 +35,18 @@ const weatherRoutes = require('./routes/weather.routes');
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : null,
+  'http://localhost:3000',
+  'http://localhost:5173'
+].filter(Boolean);
+
 // ------------------
 // 🔐 Security Middleware
 // ------------------
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -74,7 +80,7 @@ initializeFirebase();
 // ------------------
 const io = socketIO(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
