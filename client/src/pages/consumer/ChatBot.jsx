@@ -11,6 +11,8 @@ const ChatBot = () => {
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
   const messagesEndRef = useRef(null);
 
   const quickQuestions = [
