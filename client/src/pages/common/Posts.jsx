@@ -4,7 +4,6 @@ import { postsAPI } from '../../utils/api';
 import { useSocket } from '../../context/SocketContext';
 import PostCard from '../../components/PostCard';
 import CreatePost from '../../components/CreatePost';
-import LanguageSwitcher from '../../components/LanguageSwitcher';
 import toast from 'react-hot-toast';
 
 const Posts = () => {

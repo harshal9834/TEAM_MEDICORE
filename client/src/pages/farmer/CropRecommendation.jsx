@@ -87,15 +87,16 @@ const CropRecommendation = () => {
     }
   };
 
-  const getSoilTypeColor = (type) => {
-    const colors = {
-      'Clay': 'bg-red-100 text-red-800',
-      'Loamy': 'bg-green-100 text-green-800',
-      'Sandy': 'bg-yellow-100 text-yellow-800',
-      'Black Soil': 'bg-gray-100 text-gray-800'
-    };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  };
+  // Soil type color mapping
+  // const getSoilTypeColor = (type) => {
+  //   const colors = {
+  //     'Clay': 'bg-red-100 text-red-800',
+  //     'Loamy': 'bg-green-100 text-green-800',
+  //     'Sandy': 'bg-yellow-100 text-yellow-800',
+  //     'Black Soil': 'bg-gray-100 text-gray-800'
+  //   };
+  //   return colors[type] || 'bg-gray-100 text-gray-800';
+  // };
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'bg-green-500';

@@ -29,6 +29,7 @@ const WeatherWidget = () => {
 
   useEffect(() => {
     fetchWeather();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
   const fetchWeather = async () => {

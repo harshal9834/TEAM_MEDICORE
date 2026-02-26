@@ -28,6 +28,7 @@ const WeatherForecast = () => {
 
   useEffect(() => {
     fetchWeatherData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
   const fetchWeatherData = async () => {

@@ -16,7 +16,8 @@ const ConsumerShop = () => {
 
   const deliveryFee = 40;
 
-  const productsDatabase = {
+  // Local products data (fallback)
+  const fallbackProducts = {
     Millets: [
       { name: 'Foxtail Millet', price: 80, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', organic: true },
       { name: 'Pearl Millet', price: 70, image: 'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=400', organic: false },

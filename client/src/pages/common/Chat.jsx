@@ -28,6 +28,7 @@ const Chat = () => {
   // Fetch chats on component mount
   useEffect(() => {
     fetchChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Socket listeners for real-time updates

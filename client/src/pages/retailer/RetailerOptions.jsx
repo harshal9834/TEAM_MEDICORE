@@ -5,7 +5,6 @@ import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 const RetailerOptions = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentBanner, setCurrentBanner] = useState(0);
 

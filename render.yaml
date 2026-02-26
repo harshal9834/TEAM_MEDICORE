@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: medicore-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: medicore-db
+          property: connectionString
+      - key: JWT_SECRET
+        scope: all
+      - key: CLOUDINARY_NAME
+        scope: all
+      - key: CLOUDINARY_KEY
+        scope: all
+      - key: CLOUDINARY_SECRET
+        scope: all
+      - key: CLIENT_URL
+        value: https://your-vercel-domain.vercel.app
+      - key: FIREBASE_API_KEY
+        scope: all
+      - key: FIREBASE_PROJECT_ID
+        scope: all
+      - key: FIREBASE_AUTH_DOMAIN
+        scope: all
+      - key: FIREBASE_DATABASE_URL
+        scope: all
+      - key: FIREBASE_STORAGE_BUCKET
+        scope: all
+      - key: GROQ_API_KEY
+        scope: all
+
+databases:
+  - name: medicore-db
+    plan: free
+    ipAllowList: []

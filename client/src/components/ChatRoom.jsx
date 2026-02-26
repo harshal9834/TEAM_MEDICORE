@@ -18,6 +18,7 @@ const ChatRoom = ({ chatId, currentUser, onClose }) => {
 
   useEffect(() => {
     fetchChat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId]);
 
   useEffect(() => {
@@ -373,7 +374,7 @@ const ChatRoom = ({ chatId, currentUser, onClose }) => {
 
       // Try to send via API first
       try {
-        const response = await chatAPI.sendMessage({
+        await chatAPI.sendMessage({
           chatId,
           content: messageInput.trim()
         });

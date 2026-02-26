@@ -119,7 +119,7 @@ const PostCard = ({ post, onPostUpdate }) => {
                 <img
                   key={index}
                   src={imageUrl}
-                  alt={`Post image ${index + 1}`}
+                  alt={`Image ${index + 1}`}
                   className="w-full h-48 object-cover rounded-lg"
                   onError={(e) => {
                     // Only fallback once to prevent infinite loops

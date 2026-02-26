@@ -4,7 +4,7 @@ const News = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [newsArticles, setNewsArticles] = useState([
+  const [newsArticles] = useState([
     {
       id: 1,
       title: 'New Government Scheme Launched for Small Farmers',
