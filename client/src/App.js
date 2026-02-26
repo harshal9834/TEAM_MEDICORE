@@ -161,7 +161,7 @@ function App() {
     } catch (error) {
       console.error('[App] Error initializing Voice Assistant:', error);
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   /**
    * Update feature scanner when route changes
