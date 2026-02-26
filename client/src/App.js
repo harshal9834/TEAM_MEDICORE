@@ -182,7 +182,7 @@ function App() {
       featureScanner.rescan();
       console.log('[App] Features rescanned after navigation');
     }, 500);
-  }, [location.pathname]);
+  }, [location]);
 
   /**
    * Register/unregister form fields based on current page
