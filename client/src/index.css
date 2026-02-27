@@ -2,23 +2,1036 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #F5F5DC;
-  /* Soft Cream */
-  color: #212121;
+/* ============================
+   EARTHY FARM DESIGN TOKENS
+   ============================ */
+:root {
+  /* Primary Palette */
+  --farm-green: #2F6F3E;
+  --farm-green-light: #4E9F3D;
+  --farm-green-pale: #dce9d5;
+  --farm-green-bg: #e8f0e4;
+  --soil-brown: #8B5E3C;
+  --soil-brown-light: #C39B6A;
+  --wheat-gold: #D4A017;
+  --wheat-gold-light: #E8C547;
+  --sky-blue: #A7D8F5;
+  --sky-blue-light: #cfe9f8;
+  --bg-earth: #F5F3E7;
+  --bg-cream: #faf8f0;
+  --card-bg: #fffefb;
+  --text-dark: #2c2418;
+  --text-body: #4a3f2f;
+  --text-muted: #8a7e6c;
+  --border-earth: #e8e2d0;
+  --red-muted: #B0413E;
+
+  /* Sizes */
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-lg: 22px;
+  --shadow-soft: 0 2px 8px rgba(80, 60, 30, 0.06), 0 1px 3px rgba(80, 60, 30, 0.04);
+  --shadow-md: 0 4px 16px rgba(80, 60, 30, 0.08);
+  --shadow-lift: 0 8px 24px rgba(80, 60, 30, 0.1);
+  --nav-height: 72px;
+  --header-height: 56px;
 }
 
-/* Custom Component Styles for Global Theme */
+/* ============================
+   BASE & BODY
+   ============================ */
+body {
+  font-family: 'Inter', 'Nunito', sans-serif;
+  background-color: var(--bg-earth);
+  color: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Very subtle paper texture overlay */
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Baloo 2', 'Poppins', sans-serif;
+  color: var(--text-dark);
+}
+
+/* ============================
+   GOFARM APP LAYOUT
+   ============================ */
+.gofarm-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  background: var(--bg-earth);
+  overflow-x: hidden;
+}
+
+@media (min-width: 481px) {
+  .gofarm-app {
+    box-shadow: -1px 0 0 var(--border-earth), 1px 0 0 var(--border-earth);
+  }
+}
+
+/* ============================
+   HEADER
+   ============================ */
+.gofarm-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(245, 243, 231, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-earth);
+  height: var(--header-height);
+}
+
+.gofarm-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 100%;
+}
+
+.gofarm-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--farm-green-pale);
+  color: var(--farm-green);
+  transition: all 0.2s;
+}
+
+.gofarm-header-icon:hover {
+  background: var(--farm-green-bg);
+  transform: scale(1.05);
+}
+
+.gofarm-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--farm-green), var(--farm-green-light));
+  transition: all 0.2s;
+}
+
+.gofarm-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(47, 111, 62, 0.3);
+}
+
+.gofarm-content {
+  flex: 1;
+  padding-bottom: calc(var(--nav-height) + 8px);
+  position: relative;
+}
+
+/* ============================
+   BOTTOM NAVIGATION
+   ============================ */
+.gofarm-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  z-index: 100;
+  background: rgba(250, 248, 240, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-earth);
+  height: var(--nav-height);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.gofarm-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  padding: 0 4px;
+}
+
+.gofarm-nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 52px;
+}
+
+.gofarm-nav-tab.active {
+  color: var(--farm-green);
+}
+
+.gofarm-nav-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gofarm-nav-icon-wrap.active {
+  background: var(--farm-green-pale);
+  color: var(--farm-green);
+  transform: scale(1.1);
+}
+
+.gofarm-nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* ============================
+   PAGE & SECTIONS
+   ============================ */
+.gf-page {
+  padding: 16px;
+}
+
+.gf-section {
+  margin-bottom: 24px;
+}
+
+.gf-section-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gf-section-title .gf-title-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+/* ============================
+   CARDS
+   ============================ */
+.gf-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+  transition: all 0.25s ease;
+}
+
+.gf-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.gf-card-compact {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+}
+
+/* ============================
+   HERO SECTION (Home Tab)
+   ============================ */
+.gf-hero {
+  background: linear-gradient(180deg, var(--sky-blue-light) 0%, var(--bg-earth) 100%);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 24px 20px 60px;
+  position: relative;
+  overflow: hidden;
+  margin: -16px -16px 20px -16px;
+}
+
+.gf-hero-greeting {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--farm-green);
+  line-height: 1.2;
+}
+
+.gf-hero-subtext {
+  font-size: 14px;
+  color: var(--soil-brown);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Flying birds container */
+.gf-birds {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 120px;
+  height: 60px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.gf-bird {
+  position: absolute;
+  animation: birdFly 22s linear infinite;
+}
+
+.gf-bird:nth-child(2) {
+  animation-delay: -8s;
+  top: 18px;
+}
+
+.gf-bird:nth-child(3) {
+  animation-delay: -15s;
+  top: 6px;
+}
+
+@keyframes birdFly {
+  0% {
+    transform: translateX(140px) translateY(0);
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-280px) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+/* Wheat sway at bottom of hero */
+.gf-wheat-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gf-wheat-stalk {
+  font-size: 28px;
+  transform-origin: bottom center;
+  animation: wheatSway 6s ease-in-out infinite alternate;
+  display: inline-block;
+}
+
+.gf-wheat-stalk:nth-child(2n) {
+  animation-delay: -1s;
+  animation-duration: 7s;
+}
+
+.gf-wheat-stalk:nth-child(3n) {
+  animation-delay: -2.5s;
+  animation-duration: 5.5s;
+}
+
+.gf-wheat-stalk:nth-child(5n) {
+  animation-delay: -3.5s;
+  animation-duration: 8s;
+}
+
+@keyframes wheatSway {
+  0% {
+    transform: rotate(-2deg) translateX(-1px);
+  }
+
+  100% {
+    transform: rotate(2deg) translateX(1px);
+  }
+}
+
+/* ============================
+   STAT CARDS (horizontal scroll)
+   ============================ */
+.gf-stats-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.gf-stats-row::-webkit-scrollbar {
+  display: none;
+}
+
+.gf-stat-card {
+  flex: 0 0 auto;
+  width: 130px;
+  scroll-snap-align: start;
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.gf-stat-card:active {
+  transform: scale(0.97);
+}
+
+.gf-stat-value {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.gf-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ============================
+   ACTION BUTTONS (Farm Styled)
+   ============================ */
+.gf-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+  color: white;
+}
+
+.gf-action-btn:active {
+  transform: scale(0.98);
+}
+
+.gf-action-btn:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.gf-action-btn .gf-action-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.gf-action-btn-green {
+  background: var(--farm-green);
+}
+
+.gf-action-btn-green:hover {
+  box-shadow: 0 6px 20px rgba(47, 111, 62, 0.25);
+}
+
+.gf-action-btn-amber {
+  background: var(--soil-brown);
+}
+
+.gf-action-btn-amber:hover {
+  box-shadow: 0 6px 20px rgba(139, 94, 60, 0.25);
+}
+
+.gf-action-btn-blue {
+  background: #3a7ca5;
+}
+
+.gf-action-btn-blue:hover {
+  box-shadow: 0 6px 20px rgba(58, 124, 165, 0.25);
+}
+
+.gf-action-btn-purple {
+  background: #6B5B3E;
+}
+
+.gf-action-btn-purple:hover {
+  box-shadow: 0 6px 20px rgba(107, 91, 62, 0.25);
+}
+
+/* ============================
+   ACTIVITY FEED
+   ============================ */
+.gf-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-earth);
+}
+
+.gf-activity-item:last-child {
+  border-bottom: none;
+}
+
+.gf-activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.gf-activity-text {
+  font-size: 13px;
+  color: var(--text-body);
+  line-height: 1.4;
+}
+
+.gf-activity-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ============================
+   PRODUCT / EXCHANGE CARDS
+   ============================ */
+.gf-product-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+  transition: all 0.25s ease;
+}
+
+.gf-product-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.gf-product-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  background: var(--farm-green-bg);
+}
+
+.gf-product-body {
+  padding: 12px;
+}
+
+.gf-product-name {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.gf-product-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gf-product-price {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--farm-green);
+  margin-top: 6px;
+}
+
+/* ============================
+   TOGGLE TABS
+   ============================ */
+.gf-toggle-row {
+  display: flex;
+  background: var(--farm-green-pale);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.gf-toggle-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.gf-toggle-btn.active {
+  background: var(--card-bg);
+  color: var(--farm-green);
+  box-shadow: 0 1px 4px rgba(80, 60, 30, 0.08);
+}
+
+/* ============================
+   FILTER CHIPS
+   ============================ */
+.gf-filter-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.gf-filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+.gf-filter-chip {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border-earth);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.gf-filter-chip.active {
+  border-color: var(--farm-green);
+  background: var(--farm-green-pale);
+  color: var(--farm-green);
+}
+
+/* ============================
+   LABOUR CARDS
+   ============================ */
+.gf-labour-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.gf-labour-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.gf-labour-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* ============================
+   MARKET AI
+   ============================ */
+.gf-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-earth);
+}
+
+.gf-price-row:last-child {
+  border-bottom: none;
+}
+
+.gf-price-change {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.gf-price-up {
+  color: var(--farm-green);
+  background: var(--farm-green-pale);
+}
+
+.gf-price-down {
+  color: var(--red-muted);
+  background: #fdf0ef;
+}
+
+.gf-ai-card {
+  background: linear-gradient(135deg, var(--farm-green), #3a8a4e);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle grain overlay on AI card */
+.gf-ai-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.gf-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gf-ai-badge.sell {
+  background: rgba(176, 65, 62, 0.25);
+  color: #ffc4c2;
+}
+
+.gf-ai-badge.hold {
+  background: rgba(212, 160, 23, 0.25);
+  color: #fde68a;
+}
+
+/* Pulse dot for current price */
+.gf-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wheat-gold);
+  display: inline-block;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(212, 160, 23, 0.4);
+  }
+
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(212, 160, 23, 0);
+  }
+}
+
+/* ============================
+   MORE TAB
+   ============================ */
+.gf-more-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text-body);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-earth);
+  transition: all 0.25s;
+  margin-bottom: 10px;
+}
+
+.gf-more-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(3px);
+}
+
+.gf-more-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+.gf-btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: 2px dashed var(--farm-green-light);
+  background: var(--farm-green-bg);
+  color: var(--farm-green);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.gf-btn-add:hover {
+  background: var(--farm-green-pale);
+  border-color: var(--farm-green);
+  box-shadow: var(--shadow-soft);
+}
+
+.gf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  background: var(--farm-green);
+  color: white;
+  transition: all 0.25s;
+  box-shadow: 0 2px 8px rgba(47, 111, 62, 0.25);
+}
+
+.gf-btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(47, 111, 62, 0.35);
+  transform: translateY(-1px);
+}
+
+.gf-btn-primary:active {
+  transform: translateY(0);
+}
+
+.gf-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13px;
+  border: 1.5px solid var(--farm-green);
+  cursor: pointer;
+  background: var(--card-bg);
+  color: var(--farm-green);
+  transition: all 0.2s;
+}
+
+.gf-btn-outline:hover {
+  background: var(--farm-green-bg);
+}
+
+/* ============================
+   FORM INPUTS
+   ============================ */
+.gf-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-earth);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  background: var(--card-bg);
+  color: var(--text-body);
+  transition: all 0.2s;
+  outline: none;
+}
+
+.gf-input:focus {
+  border-color: var(--farm-green);
+  box-shadow: 0 0 0 3px rgba(47, 111, 62, 0.1);
+}
+
+.gf-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+/* ============================
+   WEATHER COMPACT
+   ============================ */
+.gf-weather-compact {
+  background: linear-gradient(135deg, var(--sky-blue-light), #e3f0fc);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(167, 216, 245, 0.3);
+}
+
+.gf-weather-alert {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============================
+   CROP BOTTOM LAYER
+   ============================ */
+.gf-crop-footer {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+  margin-top: -8px;
+}
+
+.gf-crop-footer span {
+  font-size: 26px;
+  display: inline-block;
+  transform-origin: bottom center;
+  animation: wheatSway 6s ease-in-out infinite alternate;
+}
+
+/* ============================
+   ANIMATIONS
+   ============================ */
+@keyframes gf-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gf-animate-in {
+  animation: gf-fadeIn 0.4s ease forwards;
+}
+
+.gf-skeleton {
+  background: linear-gradient(90deg, #ebe8dc, #ddd8c8, #ebe8dc);
+  background-size: 200% 100%;
+  animation: gf-shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes gf-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ============================
+   DAYLIGHT SHIFT (evening warmth)
+   ============================ */
+@media (prefers-color-scheme: light) {
+  /* Slight warm tone after 6PM handled via JS */
+}
+
+.gf-evening-mode {
+  --bg-earth: #f3efe0;
+  --sky-blue-light: #f0e6d0;
+}
+
+/* ============================
+   EXISTING TAILWIND COMPONENTS (preserved)
+   ============================ */
 @layer components {
   .btn-primary {
-    @apply bg-[#2E7D32] hover:bg-[#1B5E20] text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 disabled:bg-[#A5D6A7] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply bg-[#2F6F3E] hover:bg-[#265a33] text-white font-bold py-3 px-8 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 disabled:bg-[#a0c5a8] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
 
   .btn-secondary {
-    @apply bg-white border-2 border-[#2E7D32] hover:bg-[#F1F8E9] text-[#2E7D32] font-bold py-3 px-8 rounded-full transition-all duration-300 hover:-translate-y-1;
+    @apply bg-white border-2 border-[#2F6F3E] hover:bg-[#e8f0e4] text-[#2F6F3E] font-bold py-3 px-8 rounded-full transition-all duration-300 hover:-translate-y-1;
   }
 
   .card {
@@ -26,12 +1039,11 @@ body {
   }
 
   .input-field {
-    @apply w-full px-5 py-3 border-2 border-[#E8F5E9] bg-[#F8FDF9] rounded-[16px] focus:border-[#4CAF50] focus:ring-4 focus:ring-[#4CAF50]/20 focus:outline-none transition-all;
+    @apply w-full px-5 py-3 border-2 border-[#e8e2d0] bg-[#faf8f0] rounded-[16px] focus:border-[#4E9F3D] focus:ring-4 focus:ring-[#4E9F3D]/20 focus:outline-none transition-all;
   }
 
-  /* Specific elements */
   .title-primary {
-    @apply text-3xl md:text-4xl font-extrabold text-[#2E7D32] mb-2 tracking-tight;
+    @apply text-3xl md:text-4xl font-extrabold text-[#2F6F3E] mb-2 tracking-tight;
   }
 
   .subtitle-text {

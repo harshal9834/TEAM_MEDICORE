@@ -34,6 +34,12 @@ import MyReceivedRequests from './pages/farmer/MyReceivedRequests';
 import MyDisputes from './pages/farmer/MyDisputes';
 import FindLabour from './pages/farmer/FindLabour';
 import AdminDisputeDashboard from './pages/admin/AdminDisputeDashboard';
+import GoFarmLayout from './components/GoFarmLayout';
+import ProductsTab from './pages/farmer/ProductsTab';
+import ExchangeTab from './pages/farmer/ExchangeTab';
+import LabourTab from './pages/farmer/LabourTab';
+import MarketAITab from './pages/farmer/MarketAITab';
+import MoreTab from './pages/farmer/MoreTab';
 
 // Retailer Pages
 import RetailerDashboard from './pages/retailer/RetailerDashboard';
@@ -132,12 +138,20 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/language-selection" element={<LanguageSelection />} />
 
-              {/* Farmer Routes */}
-              <Route path="/farmer/dashboard" element={
+              {/* Farmer Tab Routes (GoFarm Dashboard) */}
+              <Route path="/farmer/dashboard" element={<Navigate to="/farmer/home" replace />} />
+              <Route element={
                 <ProtectedRoute allowedRoles={['farmer']}>
-                  <FarmerDashboard />
+                  <GoFarmLayout />
                 </ProtectedRoute>
-              } />
+              }>
+                <Route path="/farmer/home" element={<FarmerDashboard />} />
+                <Route path="/farmer/products-tab" element={<ProductsTab />} />
+                <Route path="/farmer/exchange-tab" element={<ExchangeTab />} />
+                <Route path="/farmer/labour-tab" element={<LabourTab />} />
+                <Route path="/farmer/market-ai" element={<MarketAITab />} />
+                <Route path="/farmer/more" element={<MoreTab />} />
+              </Route>
               <Route path="/farmer/products" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
                   <AgricultureProducts />
