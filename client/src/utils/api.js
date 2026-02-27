@@ -36,13 +36,12 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
+// Auth API (Trust Layer OTP)
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
-  login: (data) => api.post('/auth/login', data),
-  getMe: () => api.get('/auth/me'),
-  updateProfile: (data) => api.put('/auth/update-profile', data),
-  changePassword: (data) => api.put('/auth/change-password', data),
+  loginLookup: (customID) => api.post('/auth/login', { customID }),
+  verifyLogin: () => api.post('/auth/verify-login'),
+  getProfile: () => api.get('/auth/profile'),
 };
 
 // Products API

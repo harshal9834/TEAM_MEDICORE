@@ -27,16 +27,6 @@ const RoleSelection = () => {
       color: 'orange',
       gradient: 'from-orange-500 to-amber-600',
       bgGradient: 'from-orange-50 to-amber-50'
-    },
-    {
-      type: 'consumer',
-      icon: '🛒',
-      title: 'Consumer',
-      description: 'Buy fresh, quality produce directly from local farmers',
-      features: ['Fresh Products', 'Best Prices', 'Home Delivery'],
-      color: 'blue',
-      gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-50 to-indigo-50'
     }
   ];
 
@@ -92,7 +82,7 @@ const RoleSelection = () => {
                   className={`w-full bg-gradient-to-r ${role.gradient} text-white font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform transition-all duration-300 hover:-translate-y-1 text-lg`}
                 >
                   <i className="fas fa-arrow-right mr-2"></i>
-                  Start {role.title === 'Farmer' ? 'Selling' : role.title === 'Retailer' ? 'Sourcing' : 'Shopping'}
+                  Start {role.title === 'Farmer' ? 'Selling' : 'Sourcing'}
                 </button>
               </div>
             </div>

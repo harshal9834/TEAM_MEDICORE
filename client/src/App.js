@@ -1,18 +1,9 @@
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
 import './i18n'; // Initialize i18n
-
-// Voice Assistant Components
-import VoiceButton from './components/VoiceButton';
-import speechEngine from './utils/voice/speechEngine';
-import registrationHandler from './utils/voice/registrationHandler';
-import loginHandler from './utils/voice/loginHandler';
-import navigationHandler from './utils/voice/navigationHandler';
-import featureScanner from './utils/voice/featureScanner';
-import languageSupport from './utils/voice/languageSupport';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -87,172 +78,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 function App() {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [currentPage, setCurrentPage] = useState('home');
 
-  /**
-   * Initialize voice assistant system
-   */
-  useEffect(() => {
-    try {
-      // Initialize speech engine
-      if (!speechEngine.recognition) {
-        console.warn('[App] Speech Recognition not available in this browser');
-        return;
-      }
-
-      console.log('[App] Initializing Voice Assistant System...');
-
-      // Set default language
-      languageSupport.setLanguage('en-IN');
-      speechEngine.setLanguage('en-IN');
-
-      // Set navigation callback for navigationHandler
-      navigationHandler.setNavigateCallback((route) => {
-        console.log('[App] Navigating to:', route);
-        navigate(route);
-      });
-
-      // Initialize feature scanner to auto-detect navigation links
-      featureScanner.scanFeatures();
-      console.log('[App] Feature Scanner initialized with', featureScanner.getFeatures().length, 'features');
-
-      // Setup master transcript listener
-      const handleMasterTranscript = (data) => {
-        if (!data.isFinal) return;
-
-        const transcript = data.transcript.toLowerCase();
-        console.log('[App] Voice Input:', transcript);
-
-        // Determine current page based on URL
-        const pathname = location.pathname;
-        let pageType = 'navigation';
-
-        if (pathname.includes('/register')) {
-          pageType = 'registration';
-        } else if (pathname.includes('/login')) {
-          pageType = 'login';
-        }
-
-        // Route to appropriate handler
-        try {
-          if (pageType === 'registration') {
-            registrationHandler.handleTranscript(transcript);
-          } else if (pageType === 'login') {
-            loginHandler.handleTranscript(transcript);
-          } else {
-            // Default to navigation
-            navigationHandler.handleCommand(transcript);
-          }
-        } catch (error) {
-          console.error('[App] Error routing voice input:', error);
-        }
-      };
-
-      speechEngine.onTranscript(handleMasterTranscript);
-
-      console.log('[App] Voice Assistant System initialized successfully');
-
-      // Cleanup on unmount
-      return () => {
-        console.log('[App] Cleaning up Voice Assistant System');
-        speechEngine.stop();
-      };
-    } catch (error) {
-      console.error('[App] Error initializing Voice Assistant:', error);
-    }
-  }, [navigate, location.pathname]);
-
-  /**
-   * Update feature scanner when route changes
-   */
-  useEffect(() => {
-    // Update current page type
-    const pathname = location.pathname;
-    if (pathname.includes('/register')) {
-      setCurrentPage('registration');
-    } else if (pathname.includes('/login')) {
-      setCurrentPage('login');
-    } else {
-      setCurrentPage('home');
-    }
-
-    // Rescan features after navigation
-    setTimeout(() => {
-      featureScanner.rescan();
-      console.log('[App] Features rescanned after navigation');
-    }, 500);
-  }, [location]);
-
-  /**
-   * Register/unregister form fields based on current page
-   */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    try {
-      if (!speechEngine.recognition) {
-        console.warn('[App] Speech Recognition not available in this browser');
-        return;
-      }
-
-      console.log('[App] Initializing Voice Assistant System...');
-
-      languageSupport.setLanguage('en-IN');
-      speechEngine.setLanguage('en-IN');
-
-      navigationHandler.setNavigateCallback((route) => {
-        console.log('[App] Navigating to:', route);
-        navigate(route);
-      });
-
-      featureScanner.scanFeatures();
-      console.log(
-        '[App] Feature Scanner initialized with',
-        featureScanner.getFeatures().length,
-        'features'
-      );
-
-      const handleMasterTranscript = (data) => {
-        if (!data.isFinal) return;
-
-        const transcript = data.transcript.toLowerCase();
-        console.log('[App] Voice Input:', transcript);
-
-        // ✅ Use window.location instead of React location
-        const pathname = window.location.pathname;
-        let pageType = 'navigation';
-
-        if (pathname.includes('/register')) {
-          pageType = 'registration';
-        } else if (pathname.includes('/login')) {
-          pageType = 'login';
-        }
-
-        try {
-          if (pageType === 'registration') {
-            registrationHandler.handleTranscript(transcript);
-          } else if (pageType === 'login') {
-            loginHandler.handleTranscript(transcript);
-          } else {
-            navigationHandler.handleCommand(transcript);
-          }
-        } catch (error) {
-          console.error('[App] Error routing voice input:', error);
-        }
-      };
-
-      speechEngine.onTranscript(handleMasterTranscript);
-
-      console.log('[App] Voice Assistant System initialized successfully');
-
-      return () => {
-        console.log('[App] Cleaning up Voice Assistant System');
-        speechEngine.stop();
-      };
-    } catch (error) {
-      console.error('[App] Error initializing Voice Assistant:', error);
-    }
-  }, [navigate]);
   return (
     <SocketProvider>
       <div className="App">
@@ -546,8 +372,7 @@ function App() {
             </svg>
           </div>
 
-          {/* Voice Button Component */}
-          <VoiceButton navigate={navigate} currentPage={currentPage} />
+
         </div>
       </div>
     </SocketProvider>

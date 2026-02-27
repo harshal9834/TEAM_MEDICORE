@@ -1,198 +1,193 @@
-const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
 const User = require('../models/User.model');
 
-// Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d'
-  });
+/**
+ * Generate a unique customID: FARM-XXXX or RET-XXXX
+ * Uses the current count of users with that role + a random offset to avoid collisions.
+ */
+const generateCustomID = async (role) => {
+  const prefix = role === 'farmer' ? 'FARM' : 'RET';
+  let customID;
+  let exists = true;
+
+  while (exists) {
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // 1000–9999
+    customID = `${prefix}-${randomNum}`;
+    exists = await User.findOne({ customID });
+  }
+
+  return customID;
 };
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
-exports.register = async (req, res, next) => {
+/**
+ * POST /api/auth/register
+ * Protected by verifyFirebaseToken
+ *
+ * Body: { name, phone, role, district, taluka, village, pincode }
+ */
+exports.registerUser = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    const { name, phone, role, district, taluka, village, pincode } = req.body;
+    const firebaseUID = req.firebaseUID;
+
+    // Validate required fields
+    if (!name || !phone || !role || !district || !taluka || !village || !pincode) {
       return res.status(400).json({
         success: false,
-        errors: errors.array()
+        message: 'All fields are required: name, phone, role, district, taluka, village, pincode'
       });
     }
 
-    const { name, email, password, role, phone } = req.body;
-
-    // Check if user exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    // Validate role
+    if (!['farmer', 'retailer'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email'
+        message: 'Role must be either "farmer" or "retailer"'
       });
     }
+
+    // Check if user already exists by firebaseUID
+    let user = await User.findOne({ firebaseUID });
+    if (user) {
+      return res.status(200).json({ success: true, user, existing: true });
+    }
+
+    // Check for duplicate phone
+    const phoneExists = await User.findOne({ phone });
+    if (phoneExists) {
+      return res.status(409).json({
+        success: false,
+        message: 'This phone number is already registered'
+      });
+    }
+
+    // Generate unique customID
+    const customID = await generateCustomID(role);
 
     // Create user
-    const user = await User.create({
+    user = new User({
+      firebaseUID,
       name,
-      email,
-      password,
+      phone,
       role,
-      phone
+      customID,
+      location: { district, taluka, village, pincode }
     });
 
-    const token = generateToken(user._id);
+    await user.save();
+    console.log(`✅ New user registered: ${customID} (${name})`);
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      token,
-      user: {
-        _id: user._id,
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+    res.status(201).json({ success: true, user });
   } catch (error) {
-    next(error);
+    console.error('❌ Registration error:', error.message);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'User with this phone or Firebase UID already exists'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed. Please try again.'
+    });
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
-exports.login = async (req, res, next) => {
+/**
+ * POST /api/auth/login
+ * NOT protected — public endpoint
+ *
+ * Body: { customID }
+ * Returns masked phone so frontend can send OTP
+ */
+exports.loginWithID = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    const { customID } = req.body;
+
+    if (!customID) {
       return res.status(400).json({
         success: false,
-        errors: errors.array()
+        message: 'CustomID is required'
       });
     }
 
-    const { email, password } = req.body;
-
-    // Check for user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ customID: customID.toUpperCase() });
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'No user found with this ID'
       });
     }
 
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({
+    // Return full phone for Firebase OTP (frontend needs it)
+    // Also return masked version for display
+    const maskedPhone = user.phone.replace(/.(?=.{4})/g, '*');
+
+    res.status(200).json({
+      success: true,
+      phone: user.phone,
+      maskedPhone,
+      name: user.name
+    });
+  } catch (error) {
+    console.error('❌ Login lookup error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed. Please try again.'
+    });
+  }
+};
+
+/**
+ * POST /api/auth/verify-login
+ * Protected by verifyFirebaseToken
+ *
+ * After OTP verification, frontend sends the Firebase token here.
+ * Backend finds the user by firebaseUID and returns the full profile.
+ */
+exports.verifyLogin = async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUID: req.firebaseUID });
+
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'User not found. Please register first.'
       });
     }
 
-    const token = generateToken(user._id);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      token,
-      user: {
-        _id: user._id,
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
-    });
+    res.status(200).json({ success: true, user });
   } catch (error) {
-    next(error);
+    console.error('❌ Verify login error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Login verification failed'
+    });
   }
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
-exports.getMe = async (req, res, next) => {
+/**
+ * GET /api/auth/profile
+ * Protected by verifyFirebaseToken
+ */
+exports.getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    
-    res.json({
-      success: true,
-      user
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+    const user = await User.findOne({ firebaseUID: req.firebaseUID });
 
-// @desc    Update user profile
-// @route   PUT /api/auth/update-profile
-// @access  Private
-exports.updateProfile = async (req, res, next) => {
-  try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      phone: req.body.phone,
-      avatar: req.body.avatar
-    };
-
-    // Update role-specific fields
-    if (req.user.role === 'farmer' && req.body.farmDetails) {
-      fieldsToUpdate.farmDetails = req.body.farmDetails;
-    }
-
-    if (req.user.role === 'retailer' && req.body.businessDetails) {
-      fieldsToUpdate.businessDetails = req.body.businessDetails;
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      fieldsToUpdate,
-      { new: true, runValidators: true }
-    );
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      user
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Change password
-// @route   PUT /api/auth/change-password
-// @access  Private
-exports.changePassword = async (req, res, next) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    const user = await User.findById(req.user.id).select('+password');
-
-    // Check current password
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(401).json({
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: 'Current password is incorrect'
+        message: 'User not found'
       });
     }
 
-    // Update password
-    user.password = newPassword;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
-    });
+    res.status(200).json({ success: true, user });
   } catch (error) {
-    next(error);
+    console.error('❌ Get profile error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch profile'
+    });
   }
 };

@@ -1,104 +1,233 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { auth } from '../../config/firebaseConfig';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
-import loginHandler from '../../utils/voice/loginHandler';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore(state => state.setAuth);
 
-  // Create refs for form fields (for voice assistant)
-  const emailInputRef = useRef(null);
-  const passwordInputRef = useRef(null);
+  // Pre-fill customID if coming from registration
+  const idFromState = location.state?.customID || '';
 
-  // Register form fields with voice handler on mount
+  const [step, setStep] = useState(1); // 1=enter ID, 2=enter OTP
+  const [customID, setCustomID] = useState(idFromState);
+  const [phone, setPhone] = useState('');
+  const [maskedPhone, setMaskedPhone] = useState('');
+  const [userName, setUserName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  // Create reCAPTCHA container once on mount (outside React DOM)
   useEffect(() => {
-    if (emailInputRef.current && passwordInputRef.current) {
-      loginHandler.registerFormFields({
-        emailInput: emailInputRef.current,
-        passwordInput: passwordInputRef.current,
-        setFormData: setFormData  // ✅ Pass state setter to update React state
-      });
-      console.log('[Login] Form fields registered with voice handler');
+    if (!document.getElementById('recaptcha-container-login')) {
+      const el = document.createElement('div');
+      el.id = 'recaptcha-container-login';
+      document.body.appendChild(el);
     }
-
-    // Cleanup: unregister form fields when component unmounts
     return () => {
-      loginHandler.unregisterFormFields();
-      console.log('[Login] Form fields unregistered from voice handler');
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
+        window.recaptchaVerifier = null;
+      }
     };
   }, []);
 
-  const handleSubmit = async (e) => {
+  // Setup reCAPTCHA verifier (reuses the persistent container)
+  const setupRecaptcha = useCallback(() => {
+    if (window.recaptchaVerifier) {
+      try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
+      window.recaptchaVerifier = null;
+    }
+
+    const container = document.getElementById('recaptcha-container-login');
+    if (container) container.innerHTML = '';
+
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-login', {
+      size: 'invisible',
+      callback: () => console.log('[Login] reCAPTCHA solved'),
+      'expired-callback': () => {
+        setError('reCAPTCHA expired. Please try again.');
+        window.recaptchaVerifier = null;
+      }
+    });
+  }, []);
+
+  // STEP 1: Lookup user by customID and send OTP
+  const handleGetOTP = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (!customID.trim()) {
+      setError('Please enter your ID');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const response = await api.post('/auth/login', formData);
-      setAuth(response.data.user, response.data.token);
-      
-      // Redirect based on user role
-      const userRole = response.data.user.role;
-      if (userRole === 'farmer') {
+      // Lookup phone number from backend
+      const response = await api.post('/auth/login', { customID: customID.trim().toUpperCase() });
+      const { phone: userPhone, maskedPhone: masked, name } = response.data;
+
+      setPhone(userPhone);
+      setMaskedPhone(masked);
+      setUserName(name);
+
+      // Send OTP via Firebase
+      setupRecaptcha();
+      const phoneNumber = userPhone.startsWith('+') ? userPhone : `+91${userPhone}`;
+      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+      setConfirmationResult(result);
+      setStep(2);
+    } catch (err) {
+      console.error('Login lookup error:', err);
+      if (err.response?.status === 404) {
+        setError('No user found with this ID. Please check and try again.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a few minutes.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to send OTP. Try again.');
+      }
+      // Reset reCAPTCHA
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
+        window.recaptchaVerifier = null;
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // STEP 2: Verify OTP and complete login
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!otp || otp.length !== 6) {
+      setError('Enter the 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Verify OTP with Firebase
+      const result = await confirmationResult.confirm(otp);
+      const idToken = await result.user.getIdToken();
+
+      // Verify login with backend
+      const response = await api.post('/auth/verify-login', {}, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+
+      const user = response.data.user;
+
+      // Store auth state
+      setAuth(user, idToken);
+
+      // Redirect to dashboard based on role
+      if (user.role === 'farmer') {
         navigate('/farmer/dashboard');
-      } else if (userRole === 'retailer') {
+      } else if (user.role === 'retailer') {
         navigate('/retailer/options');
-      } else if (userRole === 'consumer') {
-        navigate('/consumer/dashboard');
       } else {
         navigate('/');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('OTP verify error:', err);
+      if (err.code === 'auth/invalid-verification-code') {
+        setError('Invalid OTP. Please check and try again.');
+      } else {
+        setError(err.response?.data?.message || 'Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  const inputClass = 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition-colors bg-white';
+  const btnClass = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-secondary-500 mb-6 text-center">Login to GOFaRm</h2>
+
+        <h2 className="text-2xl font-bold text-green-700 mb-1 text-center">
+          🔐 Login to GOFaRm
+        </h2>
+        <p className="text-gray-500 text-sm text-center mb-6">
+          {step === 1 ? 'Enter your Farmer / Retailer ID' : `OTP sent to ${maskedPhone}`}
+        </p>
+
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Email</label>
-            <input
-              ref={emailInputRef}
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:outline-none transition-colors"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Password</label>
-            <input
-              ref={passwordInputRef}
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:outline-none transition-colors"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-secondary-500 hover:bg-secondary-600 text-white font-bold py-3 rounded-lg transition-colors duration-300"
-          >
-            Login
-          </button>
-        </form>
-        <p className="text-center text-gray-600 mt-6">
+
+        {/* STEP 1: Enter Custom ID */}
+        {step === 1 && (
+          <form onSubmit={handleGetOTP} className="space-y-4">
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1 text-sm">Your ID</label>
+              <input
+                type="text"
+                value={customID}
+                onChange={(e) => setCustomID(e.target.value.toUpperCase())}
+                className={`${inputClass} text-center text-lg font-mono tracking-wider`}
+                placeholder="FARM-XXXX or RET-XXXX"
+                autoFocus
+                required
+              />
+            </div>
+            <button type="submit" className={btnClass} disabled={loading}>
+              {loading ? '⏳ Sending OTP...' : '📱 Get OTP'}
+            </button>
+          </form>
+        )}
+
+        {/* STEP 2: Verify OTP */}
+        {step === 2 && (
+          <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center mb-2">
+              <p className="text-sm text-gray-600">Welcome back, <strong>{userName}</strong></p>
+              <p className="text-xs text-gray-500">ID: {customID}</p>
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1 text-sm">Enter OTP</label>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className={`${inputClass} text-center text-2xl tracking-widest`}
+                placeholder="● ● ● ● ● ●"
+                maxLength={6}
+                autoFocus
+              />
+            </div>
+            <button type="submit" className={btnClass} disabled={loading}>
+              {loading ? '⏳ Verifying...' : '✅ Verify & Login'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep(1); setOtp(''); setError(''); }}
+              className="w-full text-gray-500 hover:text-gray-700 text-sm py-2"
+            >
+              ← Change ID
+            </button>
+          </form>
+        )}
+
+        <p className="text-center text-gray-600 mt-6 text-sm">
           Don't have an account?{' '}
-          <Link to="/register" className="text-secondary-500 font-semibold hover:underline">
+          <Link to="/register" className="text-green-600 font-semibold hover:underline">
             Register here
           </Link>
         </p>
+
       </div>
     </div>
   );

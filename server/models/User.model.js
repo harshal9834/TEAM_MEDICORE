@@ -1,111 +1,54 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  firebaseUID: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: {
     type: String,
     required: [true, 'Name is required'],
     trim: true
   },
-  email: {
+  phone: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, 'Phone number is required'],
     unique: true,
-    lowercase: true,
     trim: true
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: 6,
-    select: false
   },
   role: {
     type: String,
-    enum: ['farmer', 'retailer', 'consumer'],
+    enum: ['farmer', 'retailer'],
     required: true
   },
-  phone: {
+  customID: {
     type: String,
-    trim: true
+    required: true,
+    unique: true
   },
-  avatar: {
-    type: String,
-    default: ''
+
+  // Location fields
+  location: {
+    district: { type: String, required: true },
+    taluka: { type: String, required: true },
+    village: { type: String, required: true },
+    pincode: { type: String, required: true }
   },
-  
-  // Farmer specific fields
-  farmDetails: {
-    farmName: String,
-    totalLand: Number,
-    irrigationType: String,
-    soilType: String,
-    certifications: [String],
-    location: {
-      address: String,
-      city: String,
-      state: String,
-      pincode: String,
-      coordinates: {
-        lat: Number,
-        lng: Number
-      }
-    }
-  },
-  
-  // Retailer specific fields
-  businessDetails: {
-    businessName: String,
-    gstNumber: String,
-    storeType: String,
-    storeSize: Number,
-    warehouseSize: Number,
-    operatingHours: String,
-    licenses: [String]
-  },
-  
-  // Common fields
-  rating: {
+
+  trustScore: {
     type: Number,
-    default: 0,
+    default: 50,
     min: 0,
-    max: 5
-  },
-  totalRatings: {
-    type: Number,
-    default: 0
-  },
-  verified: {
-    type: Boolean,
-    default: false
-  },
-  active: {
-    type: Boolean,
-    default: true
+    max: 100
   }
 }, {
   timestamps: true
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-// Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Remove password from JSON response
-userSchema.methods.toJSON = function() {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};
+// Index for fast lookups
+userSchema.index({ customID: 1 });
+userSchema.index({ phone: 1 });
+userSchema.index({ firebaseUID: 1 });
 
 module.exports = mongoose.model('User', userSchema);

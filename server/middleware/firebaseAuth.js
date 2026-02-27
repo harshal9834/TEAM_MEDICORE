@@ -1,53 +1,67 @@
 const admin = require('firebase-admin');
 const fs = require('fs');
 const path = require('path');
-const CottonUser = require('../models/CottonUser');
 
 // Initialize Firebase Admin SDK
 const initializeFirebase = () => {
   if (admin.apps.length === 0) {
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      console.warn('⚠️ Firebase environment variables not found.');
-      console.warn('Firebase authentication will not work without FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY');
-      return false;
-    }
-
     try {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-        }),
-      });
+      // Method 1: Load from service account JSON file
+      const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+        || path.join(__dirname, '../config/firebase-service-account.json');
 
-      console.log('✓ Firebase Admin SDK initialized');
-      return true;
+      if (fs.existsSync(serviceAccountPath)) {
+        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+        });
+        console.log('✅ Firebase Admin SDK initialized (from service account JSON)');
+        return true;
+      }
+
+      // Method 2: Load from individual env vars
+      if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          }),
+        });
+        console.log('✅ Firebase Admin SDK initialized (from env vars)');
+        return true;
+      }
+
+      console.warn('⚠️  No Firebase credentials found. Provide either:');
+      console.warn('    - FIREBASE_SERVICE_ACCOUNT_PATH in .env (or place firebase-service-account.json in server/config/)');
+      console.warn('    - FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env');
+      return false;
     } catch (error) {
-      console.warn('⚠️ Firebase initialization failed:', error.message);
-      console.warn('Firebase authentication will not work - Check your service account credentials');
+      console.warn('⚠️  Firebase initialization failed:', error.message);
       return false;
     }
   }
   return true;
 };
 
-// Verify Firebase ID Token Middleware
+/**
+ * Middleware: Verify Firebase ID Token
+ * Extracts Bearer token, verifies with Firebase Admin,
+ * and sets req.firebaseUID + req.firebasePhone.
+ */
 const verifyFirebaseToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
-        message: 'No authorization token provided',
+        message: 'No valid authorization token provided',
         code: 'NO_TOKEN'
       });
     }
 
-    // Extract token from Bearer scheme
     const token = authHeader.split('Bearer ')[1];
-
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -56,60 +70,21 @@ const verifyFirebaseToken = async (req, res, next) => {
       });
     }
 
-    // Verify token with Firebase
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decoded = await admin.auth().verifyIdToken(token);
 
-    // Attach user info to request
-    req.user = {
-      firebase_uid: decodedToken.uid,
-      email: decodedToken.email,
-      name: decodedToken.name || decodedToken.email.split('@')[0],
-      token: decodedToken
-    };
-
-    // Get or create user in MongoDB
-    let user = await CottonUser.findOne({ firebase_uid: decodedToken.uid });
-
-    if (!user) {
-      // First login - create user in MongoDB
-      user = new CottonUser({
-        firebase_uid: decodedToken.uid,
-        email: decodedToken.email,
-        name: decodedToken.name || decodedToken.email.split('@')[0],
-        last_login: new Date()
-      });
-      await user.save();
-      console.log(`✓ New user created: ${decodedToken.email}`);
-    } else {
-      // Update last login
-      user.last_login = new Date();
-      await user.save();
-    }
-
-    // Attach MongoDB user ID to request
-    req.user.mongo_id = user._id;
-    req.user.user_data = user;
+    // Attach Firebase identity to request
+    req.firebaseUID = decoded.uid;
+    req.firebasePhone = decoded.phone_number || null;
 
     next();
   } catch (error) {
-    console.error('Firebase verification error:', error.message);
+    console.error('🔒 Firebase token verification failed:', error.message);
 
-    let errorCode = 'INVALID_TOKEN';
-    let status = 401;
-
-    if (error.code === 'auth/id-token-expired') {
-      errorCode = 'TOKEN_EXPIRED';
-      status = 401;
-    } else if (error.code === 'auth/invalid-id-token') {
-      errorCode = 'INVALID_TOKEN';
-      status = 401;
-    }
-
-    return res.status(status).json({
+    const isExpired = error.code === 'auth/id-token-expired';
+    return res.status(401).json({
       success: false,
-      message: 'Token verification failed',
-      code: errorCode,
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: isExpired ? 'Token expired, please re-authenticate' : 'Invalid token',
+      code: isExpired ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN'
     });
   }
 };
