@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const WeatherForecast = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
@@ -36,10 +36,10 @@ const WeatherForecast = () => {
     try {
       // Fetch current weather and forecast in parallel
       const [currentRes, forecastRes] = await Promise.all([
-        axios.get('/api/weather/current', {
+        api.get('/weather/current', {
           params: { lat: location.lat, lon: location.lon }
         }),
-        axios.get('/api/weather/forecast', {
+        api.get('/weather/forecast', {
           params: { lat: location.lat, lon: location.lon }
         })
       ]);
@@ -114,7 +114,7 @@ const WeatherForecast = () => {
         {currentWeather && (
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">📍 वर्तमान मौसम</h2>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Weather Icon and Main Info */}
               <div className="flex flex-col items-center justify-center border-r border-gray-200 col-span-1">
@@ -192,11 +192,10 @@ const WeatherForecast = () => {
                 <button
                   key={idx}
                   onClick={() => setSelectedDay(idx)}
-                  className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${
-                    selectedDay === idx
+                  className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${selectedDay === idx
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {day.date}
                 </button>

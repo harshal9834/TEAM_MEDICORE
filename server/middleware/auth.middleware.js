@@ -1,50 +1,49 @@
-const jwt = require('jsonwebtoken');
+const admin = require('firebase-admin');
 const User = require('../models/User.model');
 
-// Protect routes - verify JWT token
+/**
+ * Protect routes — verify Firebase ID token and attach user to request.
+ * Replaces old JWT-based protect middleware.
+ * Sets req.user (full Mongoose document) and req.firebaseUID.
+ */
 exports.protect = async (req, res, next) => {
   try {
     let token;
-
-    console.log('🔐 Auth middleware - Headers:', req.headers.authorization);
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
-    console.log('🔐 Auth middleware - Token exists:', !!token);
-    console.log('🔐 Auth middleware - Token length:', token?.length);
-
     if (!token) {
-      console.log('❌ Auth middleware - No token provided');
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to access this route'
+        message: 'Not authorized — no token provided'
       });
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('🔐 Auth middleware - Token decoded:', { id: decoded.id, role: decoded.role });
-      
-      req.user = await User.findById(decoded.id);
-      
-      if (!req.user) {
-        console.log('❌ Auth middleware - User not found for ID:', decoded.id);
+      // Verify Firebase ID token
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      req.firebaseUID = decodedToken.uid;
+      req.firebasePhone = decodedToken.phone_number || null;
+
+      // Lookup user in MongoDB by firebaseUID
+      const user = await User.findOne({ firebaseUID: decodedToken.uid });
+      if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'User not found'
+          message: 'User not found in database'
         });
       }
 
-      console.log('✅ Auth middleware - User authenticated:', { id: req.user._id, name: req.user.name, role: req.user.role });
-
+      // Attach full user document to request (needed by controllers that use req.user._id, req.user.role, etc.)
+      req.user = user;
       next();
     } catch (error) {
-      console.log('❌ Auth middleware - Token verification failed:', error.message);
+      console.log('❌ Firebase token verification failed:', error.message);
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to access this route'
+        message: 'Not authorized — invalid token'
       });
     }
   } catch (error) {
@@ -52,13 +51,16 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Authorize specific roles
+/**
+ * Authorize specific roles.
+ * Must be used AFTER protect middleware.
+ */
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `User role '${req.user.role}' is not authorized to access this route`
+        message: `User role '${req.user?.role}' is not authorized to access this route`
       });
     }
     next();

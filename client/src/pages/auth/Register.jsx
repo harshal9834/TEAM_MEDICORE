@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
@@ -36,40 +36,49 @@ const Register = () => {
   const [talukas, setTalukas] = useState([]);
   const [villages, setVillages] = useState([]);
 
-  // Create reCAPTCHA container once on mount (outside React DOM)
+  // Initialize reCAPTCHA ONCE on mount — with proper cleanup
   useEffect(() => {
-    if (!document.getElementById('recaptcha-container')) {
-      const el = document.createElement('div');
-      el.id = 'recaptcha-container';
-      document.body.appendChild(el);
+    // Create container outside React DOM
+    let container = document.getElementById('recaptcha-container-reg');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'recaptcha-container-reg';
+      document.body.appendChild(container);
     }
+
+    // Clear any existing verifier to avoid stale DOM refs
+    if (window.recaptchaVerifierReg) {
+      try {
+        window.recaptchaVerifierReg.clear();
+      } catch (e) {
+        // ignore clear errors
+      }
+      window.recaptchaVerifierReg = null;
+    }
+
+    try {
+      window.recaptchaVerifierReg = new RecaptchaVerifier(auth, 'recaptcha-container-reg', {
+        size: 'invisible',
+        callback: () => console.log('[Register] reCAPTCHA solved'),
+        'expired-callback': () => {
+          console.log('[Register] reCAPTCHA expired');
+        }
+      });
+    } catch (e) {
+      console.warn('[Register] reCAPTCHA init error (safe to ignore in dev):', e.message);
+    }
+
     return () => {
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-        window.recaptchaVerifier = null;
+      // Cleanup on unmount
+      if (window.recaptchaVerifierReg) {
+        try {
+          window.recaptchaVerifierReg.clear();
+        } catch (e) {
+          // ignore
+        }
+        window.recaptchaVerifierReg = null;
       }
     };
-  }, []);
-
-  // Setup reCAPTCHA verifier (reuses the persistent container)
-  const setupRecaptcha = useCallback(() => {
-    if (window.recaptchaVerifier) {
-      try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-      window.recaptchaVerifier = null;
-    }
-
-    // Reset container innerHTML so reCAPTCHA can re-render
-    const container = document.getElementById('recaptcha-container');
-    if (container) container.innerHTML = '';
-
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible',
-      callback: () => console.log('[Register] reCAPTCHA solved'),
-      'expired-callback': () => {
-        setError('reCAPTCHA expired. Please try again.');
-        window.recaptchaVerifier = null;
-      }
-    });
   }, []);
 
   // District change → populate talukas
@@ -107,9 +116,8 @@ const Register = () => {
 
     setLoading(true);
     try {
-      setupRecaptcha();
       const phoneNumber = `+91${phone}`;
-      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifierReg);
       setConfirmationResult(result);
       setStep(2);
     } catch (err) {
@@ -122,11 +130,6 @@ const Register = () => {
         setError('SMS quota exceeded. Try again later.');
       } else {
         setError(`Failed to send OTP: ${err.code || err.message || 'Unknown error'}`);
-      }
-      // Reset reCAPTCHA
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-        window.recaptchaVerifier = null;
       }
     } finally {
       setLoading(false);

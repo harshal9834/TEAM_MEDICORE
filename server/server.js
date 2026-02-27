@@ -31,6 +31,11 @@ const marketPriceRoutes = require('./routes/marketPrice.routes');
 const wasteProductRoutes = require('./routes/wasteProduct.routes');
 const cottonDiseaseRoutes = require('./routes/cottonDisease.routes');
 const weatherRoutes = require('./routes/weather.routes');
+const exchangeRoutes = require('./routes/exchange.routes');
+const disputeRoutes = require('./routes/dispute.routes');
+const marketIntelligenceRoutes = require('./routes/marketIntelligence.routes');
+const farmWorkRoutes = require('./routes/farmWork.routes');
+const { startMandiCronJob } = require('./utils/mandiCronJob');
 
 const app = express();
 const server = http.createServer(app);
@@ -57,6 +62,7 @@ app.use(express.urlencoded({ extended: true }));
 // 📂 Static Files
 // ------------------
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/image', express.static(path.join(__dirname, '../image')));
 
 // ------------------
@@ -132,6 +138,10 @@ app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/waste-products', wasteProductRoutes);
 app.use('/api/cotton', cottonDiseaseRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/exchange', exchangeRoutes);
+app.use('/api/disputes', disputeRoutes);
+app.use('/api/market', marketIntelligenceRoutes);
+app.use('/api/work', farmWorkRoutes);
 
 // ------------------
 // ❌ 404 Handler
@@ -163,6 +173,9 @@ server.listen(PORT, () => {
   console.log('\n🚀 Server Started Successfully');
   console.log(`🌍 Port: ${PORT}`);
   console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  // Start daily mandi price cron job
+  startMandiCronJob();
 });
 
 module.exports = { app, io };

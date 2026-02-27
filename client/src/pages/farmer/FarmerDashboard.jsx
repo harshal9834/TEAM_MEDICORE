@@ -16,19 +16,15 @@ const FarmerDashboard = () => {
     { icon: 'fa-recycle', title: t('navigation.wasteManagement'), desc: t('dashboard.sustainableSolutions') || 'Sustainable solutions', link: '/farmer/waste', color: 'amber' },
     { icon: 'fa-seedling', title: t('dashboard.cropDiseaseDetection') || 'Crop Disease Detection', desc: t('dashboard.aiDetection') || 'AI-powered detection', link: '/farmer/disease-detection', color: 'green' },
     { icon: 'fa-robot', title: t('navigation.chatBot'), desc: t('dashboard.instantHelp') || 'Get instant help', link: '/farmer/chatbot', color: 'amber' },
+    { icon: 'fa-exchange-alt', title: 'Exchange', desc: 'Barter crops & equipment', link: '/farmer/exchange/new', color: 'blue' },
     { icon: 'fa-leaf', title: 'Crop Recommendation', desc: 'Get best crop suggestions', link: '/farmer/crop-recommendation', color: 'green' },
-    { icon: 'fa-history', title: t('orders.orderHistory'), desc: t('dashboard.trackTransactions') || 'Track all transactions', link: '/orders', color: 'blue' },
+    { icon: 'fa-users', title: 'Find Labour', desc: 'Post & find farm workers', link: '/farmer/find-labour', color: 'purple' },
     { icon: 'fa-file-alt', title: t('dashboard.reportSection') || 'Report Section', desc: t('dashboard.submitReports') || 'Submit reports', link: '/report', color: 'green' },
   ];
 
   const marketGrowthItems = [
-    { icon: 'fa-user-plus', title: t('dashboard.addForConsumer') || 'ADD FOR CONSUMER', desc: t('dashboard.createListings') || 'Create listings', link: '/farmer/add-products', color: 'purple' },
-    { icon: 'fa-edit', title: t('navigation.posts'), desc: t('dashboard.shareConnect') || 'Share and connect', link: '/farmer/community', color: 'purple' },
-    { icon: 'fa-store', title: t('dashboard.market') || 'Market', desc: t('dashboard.browseMarketplace') || 'Browse marketplace', link: '/products', color: 'green' },
-    { icon: 'fa-chart-line', title: t('navigation.futureDemand'), desc: t('dashboard.marketPredictions') || 'Market predictions', link: '/farmer/future-demand', color: 'blue' },
+    { icon: 'fa-chart-line', title: t('navigation.marketIntelligence') || 'Market Intelligence', desc: t('dashboard.volatilityAnalysis') || 'Volatility & selling window', link: '/farmer/market-intelligence', color: 'blue' },
     { icon: 'fa-handshake', title: t('navigation.retailerContact'), desc: t('dashboard.connectBuyers') || 'Connect with buyers', link: '/farmer/retailers', color: 'yellow' },
-    { icon: 'fa-newspaper', title: t('dashboard.news') || 'NEWS', desc: t('dashboard.industryUpdates') || 'Industry updates', link: '/news', color: 'gray' },
-    { icon: 'fa-university', title: t('navigation.governmentSchemes'), desc: t('dashboard.policyBenefits') || 'Policy benefits', link: '/farmer/schemes', color: 'green' },
   ];
 
   const getColorClasses = (color) => {

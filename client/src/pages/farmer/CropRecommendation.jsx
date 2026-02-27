@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const CropRecommendation = () => {
   const [formData, setFormData] = useState({
@@ -47,7 +47,7 @@ const CropRecommendation = () => {
     setActiveView('results');
 
     try {
-      const response = await axios.post('/api/crops/recommendations/full', formData);
+      const response = await api.post('/crops/recommendations/full', formData);
       setRecommendations(response.data.recommendations);
       setGroqAnalysis(response.data.groqAnalysis);
     } catch (err) {
@@ -61,7 +61,7 @@ const CropRecommendation = () => {
   const getCropSpecificAdvice = async (cropName) => {
     setAdviceLoading(true);
     try {
-      const response = await axios.post(`/api/crops/groq-advice/${cropName}`, formData);
+      const response = await api.post(`/crops/groq-advice/${cropName}`, formData);
       setCropAdvice(response.data.advice);
       setSelectedCrop(cropName);
       setActiveView('advice');
@@ -76,7 +76,7 @@ const CropRecommendation = () => {
   const getSoilImprovement = async () => {
     setAdviceLoading(true);
     try {
-      const response = await axios.post('/api/crops/soil-improvement', { soil: formData.soil });
+      const response = await api.post('/crops/soil-improvement', { soil: formData.soil });
       setSoilPlan(response.data.plan);
       setActiveView('soilplan');
     } catch (err) {
@@ -144,21 +144,19 @@ const CropRecommendation = () => {
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setActiveTab('soil')}
-                  className={`flex-1 py-2 px-3 rounded font-semibold transition ${
-                    activeTab === 'soil'
+                  className={`flex-1 py-2 px-3 rounded font-semibold transition ${activeTab === 'soil'
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   मिट्टी
                 </button>
                 <button
                   onClick={() => setActiveTab('weather')}
-                  className={`flex-1 py-2 px-3 rounded font-semibold transition ${
-                    activeTab === 'weather'
+                  className={`flex-1 py-2 px-3 rounded font-semibold transition ${activeTab === 'weather'
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   मौसम
                 </button>
@@ -354,32 +352,29 @@ const CropRecommendation = () => {
                 <div className="flex gap-2 mb-4 bg-white rounded-lg shadow p-2">
                   <button
                     onClick={() => setActiveView('results')}
-                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${
-                      activeView === 'results'
+                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${activeView === 'results'
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     🌾 फसल सुझाव
                   </button>
                   <button
                     onClick={() => setActiveView('groq')}
-                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${
-                      activeView === 'groq'
+                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${activeView === 'groq'
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     🤖 {loading ? '⌛ AI...' : 'AI विश्लेषण'}
                   </button>
                   <button
                     onClick={getSoilImprovement}
                     disabled={adviceLoading}
-                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${
-                      activeView === 'soilplan'
+                    className={`flex-1 py-2 px-3 rounded font-semibold transition ${activeView === 'soilplan'
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50'
-                    }`}
+                      }`}
                   >
                     🌱 मिट्टी योजना
                   </button>
@@ -420,41 +415,41 @@ const CropRecommendation = () => {
                             </ul>
                           </div>
 
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-blue-50 p-3 rounded">
-                          <p className="text-xs text-gray-600">अपेक्षित उपज</p>
-                          <p className="font-bold text-blue-700">{recommendations[0].expectedYield || 'उपलब्ध नहीं'}</p>
-                        </div>
-                        <div className="bg-orange-50 p-3 rounded">
-                          <p className="text-xs text-gray-600">रोपण का मौसम</p>
-                          <p className="font-bold text-orange-700 text-sm">{recommendations[0].sowingSeason || 'उपलब्ध नहीं'}</p>
-                        </div>
-                        <div className="bg-cyan-50 p-3 rounded">
-                          <p className="text-xs text-gray-600">जल आवश्यकता</p>
-                          <p className="font-bold text-cyan-700 text-sm">{recommendations[0].waterRequirement || 'उपलब्ध नहीं'}</p>
-                        </div>
-                        <div className="bg-purple-50 p-3 rounded">
-                          <p className="text-xs text-gray-600">बाजार मांग</p>
-                          <p className={`font-bold text-sm ${getDemandColor(recommendations[0].marketDemand || 'Medium').split(' ')[1]}`}>
-                            {recommendations[0].marketDemand === 'High' ? 'अधिक' : recommendations[0].marketDemand === 'Medium' ? 'मध्यम' : 'कम'}
-                          </p>
-                        </div>
-                      </div>
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="bg-blue-50 p-3 rounded">
+                              <p className="text-xs text-gray-600">अपेक्षित उपज</p>
+                              <p className="font-bold text-blue-700">{recommendations[0].expectedYield || 'उपलब्ध नहीं'}</p>
+                            </div>
+                            <div className="bg-orange-50 p-3 rounded">
+                              <p className="text-xs text-gray-600">रोपण का मौसम</p>
+                              <p className="font-bold text-orange-700 text-sm">{recommendations[0].sowingSeason || 'उपलब्ध नहीं'}</p>
+                            </div>
+                            <div className="bg-cyan-50 p-3 rounded">
+                              <p className="text-xs text-gray-600">जल आवश्यकता</p>
+                              <p className="font-bold text-cyan-700 text-sm">{recommendations[0].waterRequirement || 'उपलब्ध नहीं'}</p>
+                            </div>
+                            <div className="bg-purple-50 p-3 rounded">
+                              <p className="text-xs text-gray-600">बाजार मांग</p>
+                              <p className={`font-bold text-sm ${getDemandColor(recommendations[0].marketDemand || 'Medium').split(' ')[1]}`}>
+                                {recommendations[0].marketDemand === 'High' ? 'अधिक' : recommendations[0].marketDemand === 'Medium' ? 'मध्यम' : 'कम'}
+                              </p>
+                            </div>
+                          </div>
 
-                      {/* Risk & Demand Badges */}
-                      <div className="flex gap-2 mb-4">
-                        {recommendations[0].riskLevel && (
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getRiskColor(recommendations[0].riskLevel)}`}>
-                            जोखिम: {recommendations[0].riskLevel === 'Low' ? 'कम' : recommendations[0].riskLevel === 'Medium' ? 'मध्यम' : 'अधिक'}
-                          </span>
-                        )}
-                        {recommendations[0].marketDemand && (
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDemandColor(recommendations[0].marketDemand)}`}>
-                            मांग: {recommendations[0].marketDemand === 'High' ? 'अधिक' : recommendations[0].marketDemand === 'Medium' ? 'मध्यम' : 'कम'}
-                          </span>
-                        )}
-                      </div>
+                          {/* Risk & Demand Badges */}
+                          <div className="flex gap-2 mb-4">
+                            {recommendations[0].riskLevel && (
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getRiskColor(recommendations[0].riskLevel)}`}>
+                                जोखिम: {recommendations[0].riskLevel === 'Low' ? 'कम' : recommendations[0].riskLevel === 'Medium' ? 'मध्यम' : 'अधिक'}
+                              </span>
+                            )}
+                            {recommendations[0].marketDemand && (
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDemandColor(recommendations[0].marketDemand)}`}>
+                                मांग: {recommendations[0].marketDemand === 'High' ? 'अधिक' : recommendations[0].marketDemand === 'Medium' ? 'मध्यम' : 'कम'}
+                              </span>
+                            )}
+                          </div>
 
                           {/* Fertilizer Section */}
                           <div className="bg-yellow-50 p-3 rounded mb-4">
@@ -500,65 +495,65 @@ const CropRecommendation = () => {
                   </div>
                 )}
 
-            {/* Groq AI Analysis View */}
-            {activeView === 'groq' && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg mb-4">
-                  <h2 className="text-2xl font-bold mb-1">🤖 Groq AI विश्लेषण</h2>
-                  <p className="text-blue-100">आपकी मिट्टी और मौसम के लिए {recommendations && recommendations.length > 0 ? recommendations[0].cropName : 'फसल'} की विस्तृत जानकारी</p>
-                </div>
-                {groqAnalysis ? (
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4 max-h-96 overflow-y-auto bg-gray-50 rounded">
-                    {groqAnalysis}
-                  </div>
-                ) : (
-                  <div className="text-center p-8">
-                    <div className="text-gray-400 mb-3">
-                      {loading ? '⌛ विश्लेषण प्राप्त कर रहे हैं...' : '📊 AI विश्लेषण अभी उपलब्ध नहीं है'}
+                {/* Groq AI Analysis View */}
+                {activeView === 'groq' && (
+                  <div className="bg-white rounded-lg shadow-lg p-6">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg mb-4">
+                      <h2 className="text-2xl font-bold mb-1">🤖 Groq AI विश्लेषण</h2>
+                      <p className="text-blue-100">आपकी मिट्टी और मौसम के लिए {recommendations && recommendations.length > 0 ? recommendations[0].cropName : 'फसल'} की विस्तृत जानकारी</p>
                     </div>
-                    {loading && <div className="animate-pulse text-gray-400">कृपया प्रतीक्षा करें...</div>}
+                    {groqAnalysis ? (
+                      <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4 max-h-96 overflow-y-auto bg-gray-50 rounded">
+                        {groqAnalysis}
+                      </div>
+                    ) : (
+                      <div className="text-center p-8">
+                        <div className="text-gray-400 mb-3">
+                          {loading ? '⌛ विश्लेषण प्राप्त कर रहे हैं...' : '📊 AI विश्लेषण अभी उपलब्ध नहीं है'}
+                        </div>
+                        {loading && <div className="animate-pulse text-gray-400">कृपया प्रतीक्षा करें...</div>}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Crop Specific Advice View */}
-            {activeView === 'advice' && cropAdvice && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-lg mb-4">
-                  <h2 className="text-2xl font-bold mb-1">📋 {selectedCrop} के लिए विस्तृत सलाह</h2>
-                  <p className="text-purple-100">Groq AI द्वारा तैयार विशेष कृषि सलाह</p>
-                </div>
-                <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4">
-                  {cropAdvice}
-                </div>
-                <button
-                  onClick={() => setActiveView('results')}
-                  className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-                >
-                  ← पिछले सुझाव देखें
-                </button>
-              </div>
-            )}
+                {/* Crop Specific Advice View */}
+                {activeView === 'advice' && cropAdvice && (
+                  <div className="bg-white rounded-lg shadow-lg p-6">
+                    <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-lg mb-4">
+                      <h2 className="text-2xl font-bold mb-1">📋 {selectedCrop} के लिए विस्तृत सलाह</h2>
+                      <p className="text-purple-100">Groq AI द्वारा तैयार विशेष कृषि सलाह</p>
+                    </div>
+                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4">
+                      {cropAdvice}
+                    </div>
+                    <button
+                      onClick={() => setActiveView('results')}
+                      className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                    >
+                      ← पिछले सुझाव देखें
+                    </button>
+                  </div>
+                )}
 
-            {/* Soil Improvement Plan View */}
-            {activeView === 'soilplan' && soilPlan && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-t-lg mb-4">
-                  <h2 className="text-2xl font-bold mb-1">🌱 मिट्टी सुधार योजना</h2>
-                  <p className="text-green-100">12 महीने की विस्तृत मिट्टी सुधार योजना</p>
-                </div>
-                <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4">
-                  {soilPlan}
-                </div>
-                <button
-                  onClick={() => setActiveView('results')}
-                  className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-                >
-                  ← पिछले सुझाव देखें
-                </button>
-              </div>
-            )}
+                {/* Soil Improvement Plan View */}
+                {activeView === 'soilplan' && soilPlan && (
+                  <div className="bg-white rounded-lg shadow-lg p-6">
+                    <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-t-lg mb-4">
+                      <h2 className="text-2xl font-bold mb-1">🌱 मिट्टी सुधार योजना</h2>
+                      <p className="text-green-100">12 महीने की विस्तृत मिट्टी सुधार योजना</p>
+                    </div>
+                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm p-4">
+                      {soilPlan}
+                    </div>
+                    <button
+                      onClick={() => setActiveView('results')}
+                      className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                    >
+                      ← पिछले सुझाव देखें
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

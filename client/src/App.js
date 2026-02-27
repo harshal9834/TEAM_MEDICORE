@@ -21,13 +21,19 @@ import WeatherForecast from './pages/farmer/WeatherForecast';
 import WasteManagement from './pages/farmer/WasteManagement';
 import ChatBot from './pages/farmer/ChatBot';
 import Posts from './pages/common/Posts';
-import FutureDemand from './pages/farmer/FutureDemand';
+import MarketIntelligencePage from './pages/farmer/MarketIntelligencePage';
 import RetailerContact from './pages/farmer/RetailerContact';
 import GovernmentSchemes from './pages/farmer/GovernmentSchemes';
 
 import Negotiation from './pages/farmer/Negotiation';
 import AgricultureProducts from './pages/farmer/AgricultureProducts';
 import ConsumerListings from './pages/farmer/ConsumerListings';
+import ExchangeRequestForm from './pages/farmer/ExchangeRequestForm';
+import MySentRequests from './pages/farmer/MySentRequests';
+import MyReceivedRequests from './pages/farmer/MyReceivedRequests';
+import MyDisputes from './pages/farmer/MyDisputes';
+import FindLabour from './pages/farmer/FindLabour';
+import AdminDisputeDashboard from './pages/admin/AdminDisputeDashboard';
 
 // Retailer Pages
 import RetailerDashboard from './pages/retailer/RetailerDashboard';
@@ -170,9 +176,9 @@ function App() {
                   <Posts />
                 </ProtectedRoute>
               } />
-              <Route path="/farmer/future-demand" element={
+              <Route path="/farmer/market-intelligence" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
-                  <FutureDemand />
+                  <MarketIntelligencePage />
                 </ProtectedRoute>
               } />
               <Route path="/farmer/retailers" element={
@@ -193,6 +199,36 @@ function App() {
               <Route path="/farmer/negotiation" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
                   <Negotiation />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/exchange/new" element={
+                <ProtectedRoute allowedRoles={['farmer', 'retailer']}>
+                  <ExchangeRequestForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/exchanges/sent" element={
+                <ProtectedRoute allowedRoles={['farmer', 'retailer']}>
+                  <MySentRequests />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/exchanges/received" element={
+                <ProtectedRoute allowedRoles={['farmer', 'retailer']}>
+                  <MyReceivedRequests />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/disputes" element={
+                <ProtectedRoute allowedRoles={['farmer', 'retailer']}>
+                  <MyDisputes />
+                </ProtectedRoute>
+              } />
+              <Route path="/farmer/find-labour" element={
+                <ProtectedRoute allowedRoles={['farmer']}>
+                  <FindLabour />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/disputes" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDisputeDashboard />
                 </ProtectedRoute>
               } />
 

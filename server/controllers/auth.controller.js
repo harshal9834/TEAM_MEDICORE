@@ -54,10 +54,18 @@ exports.registerUser = async (req, res) => {
     // Check for duplicate phone
     const phoneExists = await User.findOne({ phone });
     if (phoneExists) {
-      return res.status(409).json({
-        success: false,
-        message: 'This phone number is already registered'
-      });
+      // If phone belongs to a DIFFERENT firebaseUID, the old Firebase account was deleted
+      // Clean up the orphaned MongoDB record and allow re-registration
+      if (phoneExists.firebaseUID !== firebaseUID) {
+        console.log(`🔄 Orphaned user found: ${phoneExists.customID} (old UID: ${phoneExists.firebaseUID}). Replacing with new Firebase UID.`);
+        await User.deleteOne({ _id: phoneExists._id });
+      } else {
+        // Same Firebase UID + same phone = genuinely duplicate
+        return res.status(409).json({
+          success: false,
+          message: 'This phone number is already registered'
+        });
+      }
     }
 
     // Generate unique customID

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const WeatherWidget = () => {
@@ -35,7 +35,7 @@ const WeatherWidget = () => {
   const fetchWeather = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/weather/current', {
+      const response = await api.get('/weather/current', {
         params: {
           lat: location.lat,
           lon: location.lon

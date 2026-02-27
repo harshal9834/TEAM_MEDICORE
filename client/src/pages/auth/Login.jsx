@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
@@ -22,39 +22,25 @@ const Login = () => {
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // Create reCAPTCHA container once on mount (outside React DOM)
+
+  // Initialize reCAPTCHA ONCE on mount — never clear or recreate
   useEffect(() => {
-    if (!document.getElementById('recaptcha-container-login')) {
-      const el = document.createElement('div');
-      el.id = 'recaptcha-container-login';
-      document.body.appendChild(el);
-    }
-    return () => {
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-        window.recaptchaVerifier = null;
-      }
-    };
-  }, []);
-
-  // Setup reCAPTCHA verifier (reuses the persistent container)
-  const setupRecaptcha = useCallback(() => {
-    if (window.recaptchaVerifier) {
-      try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-      window.recaptchaVerifier = null;
+    let container = document.getElementById('recaptcha-container-login');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'recaptcha-container-login';
+      document.body.appendChild(container);
     }
 
-    const container = document.getElementById('recaptcha-container-login');
-    if (container) container.innerHTML = '';
-
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-login', {
-      size: 'invisible',
-      callback: () => console.log('[Login] reCAPTCHA solved'),
-      'expired-callback': () => {
-        setError('reCAPTCHA expired. Please try again.');
-        window.recaptchaVerifier = null;
-      }
-    });
+    if (!window.recaptchaVerifierLogin) {
+      window.recaptchaVerifierLogin = new RecaptchaVerifier(auth, 'recaptcha-container-login', {
+        size: 'invisible',
+        callback: () => console.log('[Login] reCAPTCHA solved'),
+        'expired-callback': () => {
+          console.log('[Login] reCAPTCHA expired');
+        }
+      });
+    }
   }, []);
 
   // STEP 1: Lookup user by customID and send OTP
@@ -78,9 +64,8 @@ const Login = () => {
       setUserName(name);
 
       // Send OTP via Firebase
-      setupRecaptcha();
       const phoneNumber = userPhone.startsWith('+') ? userPhone : `+91${userPhone}`;
-      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifierLogin);
       setConfirmationResult(result);
       setStep(2);
     } catch (err) {
@@ -91,11 +76,6 @@ const Login = () => {
         setError('Too many attempts. Please wait a few minutes.');
       } else {
         setError(err.response?.data?.message || 'Failed to send OTP. Try again.');
-      }
-      // Reset reCAPTCHA
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) { /* ignore */ }
-        window.recaptchaVerifier = null;
       }
     } finally {
       setLoading(false);

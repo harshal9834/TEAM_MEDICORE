@@ -44,6 +44,30 @@ export const authAPI = {
   getProfile: () => api.get('/auth/profile'),
 };
 
+// Exchange API (Barter Module)
+export const exchangeAPI = {
+  create: (data) => api.post('/exchange/create', data),
+  getSent: () => api.get('/exchange/sent'),
+  getReceived: () => api.get('/exchange/received'),
+  accept: (exchangeID) => api.put(`/exchange/${exchangeID}/accept`),
+  reject: (exchangeID) => api.put(`/exchange/${exchangeID}/reject`),
+  complete: (exchangeID) => api.put(`/exchange/${exchangeID}/complete`),
+  cancel: (exchangeID) => api.put(`/exchange/${exchangeID}/cancel`),
+  pay: (exchangeID) => api.put(`/exchange/${exchangeID}/pay`),
+};
+
+// Disputes API
+export const disputeAPI = {
+  create: (formData) => api.post('/disputes/create', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getMine: () => api.get('/disputes/mine'),
+  adminGetAll: (status) => api.get('/disputes/admin/all', { params: status ? { status } : {} }),
+  review: (disputeID) => api.put(`/disputes/${disputeID}/review`),
+  resolve: (disputeID, data) => api.put(`/disputes/${disputeID}/resolve`, data),
+  reject: (disputeID, data) => api.put(`/disputes/${disputeID}/reject`, data),
+};
+
 // Products API
 export const productsAPI = {
   getAll: (params) => api.get('/products', { params }),
@@ -67,19 +91,19 @@ export const productsAPI = {
   search: (query) => api.get('/products/search', { params: { q: query } }),
 };
 
+// Orders API
+export const ordersAPI = {
+  create: (data) => api.post('/orders', data),
+  getAll: () => api.get('/orders'),
+  getById: (id) => api.get(`/orders/${id}`),
+};
+
 // Crops API
 export const cropsAPI = {
   getAll: () => api.get('/crops'),
   create: (data) => api.post('/crops', data),
   update: (id, data) => api.put(`/crops/${id}`, data),
   delete: (id) => api.delete(`/crops/${id}`),
-};
-
-// Orders API
-export const ordersAPI = {
-  getAll: () => api.get('/orders'),
-  create: (data) => api.post('/orders', data),
-  updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
 };
 
 // Chat API
@@ -163,6 +187,16 @@ export const cartAPI = {
   update: (productId, quantity) => api.put('/cart/update', { productId, quantity }),
   remove: (productId) => api.delete(`/cart/remove/${productId}`),
   clear: () => api.delete('/cart/clear'),
+};
+
+// Farm Work / Labour Exchange API
+export const farmWorkAPI = {
+  create: (data) => api.post('/work/create', data),
+  getNearby: () => api.get('/work/nearby'),
+  apply: (postId) => api.post(`/work/apply/${postId}`),
+  getMyPosts: () => api.get('/work/my-posts'),
+  delete: (postId) => api.delete(`/work/${postId}`),
+  close: (postId) => api.put(`/work/${postId}/close`),
 };
 
 export default api;
