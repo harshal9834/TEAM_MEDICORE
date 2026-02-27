@@ -90,7 +90,12 @@
     "shop": "दुकान",
     "wishlist": "इच्छा यादी",
     "cart": "कार्ट",
-    "farmerContact": "शेतकरी संपर्क"
+    "farmerContact": "शेतकरी संपर्क",
+    "marketIntelligence": "बाजार बुद्धिमत्ता",
+    "exchange": "देवाणघेवाण",
+    "labour": "मजुरी",
+    "marketAI": "बाजार AI",
+    "more": "अधिक"
   },
   "retailer": {
     "title": "किरकोळ विक्रेता डॅशबोर्ड",
@@ -160,7 +165,23 @@
     "connectBuyers": "खरेदीदारांशी जुडा",
     "news": "बातम्या",
     "industryUpdates": "उद्योग अपडेट",
-    "policyBenefits": "धोरण फायदे"
+    "policyBenefits": "धोरण फायदे",
+    "volatilityAnalysis": "अस्थिरता आणि विक्री विंडो",
+    "labourExchange": "मजूर देवाणघेवाण",
+    "postWork": "काम आवश्यकता पोस्ट करा"
+  },
+  "weather": {
+    "title": "हवामान",
+    "loading": "हवामान लोड होत आहे...",
+    "humidity": "आर्द्रता",
+    "wind": "वारा",
+    "feelsLike": "जाणवते",
+    "refresh": "रीफ्रेश"
+  },
+  "footer": {
+    "tagline": "शेतकऱ्यांना बाजार, खरेदीदार आणि ज्ञानाशी जोडणे.",
+    "allRights": "सर्व हक्क राखीव.",
+    "madeWith": "भारतीय शेतकऱ्यांसाठी प्रेमाने बनवले"
   },
   "orders": {
     "orderHistory": "ऑर्डर इतिहास"

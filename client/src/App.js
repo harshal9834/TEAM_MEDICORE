@@ -34,12 +34,6 @@ import MyReceivedRequests from './pages/farmer/MyReceivedRequests';
 import MyDisputes from './pages/farmer/MyDisputes';
 import FindLabour from './pages/farmer/FindLabour';
 import AdminDisputeDashboard from './pages/admin/AdminDisputeDashboard';
-import GoFarmLayout from './components/GoFarmLayout';
-import ProductsTab from './pages/farmer/ProductsTab';
-import ExchangeTab from './pages/farmer/ExchangeTab';
-import LabourTab from './pages/farmer/LabourTab';
-import MarketAITab from './pages/farmer/MarketAITab';
-import MoreTab from './pages/farmer/MoreTab';
 
 // Retailer Pages
 import RetailerDashboard from './pages/retailer/RetailerDashboard';
@@ -121,9 +115,10 @@ function App() {
           }}
         />
 
-        {/* Global Page Layout with Grass Background */}
+        {/* Global Page Layout */}
         <div className="flex flex-col min-h-screen relative overflow-x-hidden">
 
+          {/* ── Page content – z-10 keeps it above all decoratives ── */}
           <div className="flex-grow z-10 pb-32">
             <Routes>
               {/* Public Routes */}
@@ -138,20 +133,12 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/language-selection" element={<LanguageSelection />} />
 
-              {/* Farmer Tab Routes (GoFarm Dashboard) */}
-              <Route path="/farmer/dashboard" element={<Navigate to="/farmer/home" replace />} />
-              <Route element={
+              {/* Farmer Routes */}
+              <Route path="/farmer/dashboard" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
-                  <GoFarmLayout />
+                  <FarmerDashboard />
                 </ProtectedRoute>
-              }>
-                <Route path="/farmer/home" element={<FarmerDashboard />} />
-                <Route path="/farmer/products-tab" element={<ProductsTab />} />
-                <Route path="/farmer/exchange-tab" element={<ExchangeTab />} />
-                <Route path="/farmer/labour-tab" element={<LabourTab />} />
-                <Route path="/farmer/market-ai" element={<MarketAITab />} />
-                <Route path="/farmer/more" element={<MoreTab />} />
-              </Route>
+              } />
               <Route path="/farmer/products" element={
                 <ProtectedRoute allowedRoles={['farmer']}>
                   <AgricultureProducts />
@@ -414,24 +401,32 @@ function App() {
             </Routes>
           </div>
 
-          {/* Global Grass SVG Element */}
-          <div className="absolute bottom-0 left-0 w-full h-[120px] z-0 pointer-events-none overflow-hidden">
-            <svg className="w-full h-full block" viewBox="0 0 1000 100" preserveAspectRatio="none">
-              <path fill="#81C784" d="M0,100 C150,80 350,110 500,70 C650,30 850,90 1000,60 L1000,100 L0,100 Z" />
-              <path fill="#66BB6A" d="M0,100 C200,90 400,60 600,90 C800,120 900,50 1000,80 L1000,100 L0,100 Z" />
-              {/* Animated front layer via inline style tag since it uses keyframes */}
-              <style>{`
-                @keyframes windWave {
-                  0% { transform: translateX(0) scaleY(1); }
-                  100% { transform: translateX(-2%) scaleY(1.05); }
-                }
-                .grass-front {
-                  fill: #4CAF50;
-                  animation: windWave 10s ease-in-out infinite alternate;
-                }
-              `}</style>
-              <path className="grass-front" d="M0,100 C250,100 450,80 650,100 C850,120 950,90 1000,100 L1000,120 L0,120 Z" />
-            </svg>
+          {/* ── Sky background (z-0) ── */}
+          <div className="farm-sky-bg" />
+
+          {/* ── Clouds (z-1) — 3 layers drifting at different speeds ── */}
+          <div className="farm-clouds">
+            <div className="farm-cloud farm-cloud-1">
+              <svg width="130" height="52" viewBox="0 0 120 48" fill="none">
+                <ellipse cx="60" cy="30" rx="48" ry="16" fill="white" opacity="0.45" />
+                <ellipse cx="40" cy="24" rx="26" ry="13" fill="white" opacity="0.42" />
+                <ellipse cx="78" cy="26" rx="22" ry="11" fill="white" opacity="0.42" />
+                <ellipse cx="55" cy="20" rx="20" ry="11" fill="white" opacity="0.5" />
+              </svg>
+            </div>
+            <div className="farm-cloud farm-cloud-2">
+              <svg width="95" height="38" viewBox="0 0 120 48" fill="none">
+                <ellipse cx="60" cy="30" rx="48" ry="15" fill="white" opacity="0.35" />
+                <ellipse cx="42" cy="23" rx="24" ry="11" fill="white" opacity="0.35" />
+                <ellipse cx="76" cy="25" rx="19" ry="10" fill="white" opacity="0.38" />
+              </svg>
+            </div>
+            <div className="farm-cloud farm-cloud-3">
+              <svg width="75" height="30" viewBox="0 0 120 48" fill="none">
+                <ellipse cx="60" cy="28" rx="42" ry="13" fill="white" opacity="0.28" />
+                <ellipse cx="44" cy="23" rx="20" ry="9" fill="white" opacity="0.28" />
+              </svg>
+            </div>
           </div>
 
 

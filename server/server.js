@@ -41,19 +41,37 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : null,
   'http://localhost:3000',
-  'http://localhost:5173'
-].filter(Boolean);
+  'http://localhost:5173',
+  ...(process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(u => u.trim().replace(/\/$/, ''))
+    : [])
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow localhost and any *.vercel.app preview URL
+    if (
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
 // ------------------
 // 🔐 Security Middleware
 // ------------------
 app.use(helmet());
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Pre-flight for all routes
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -86,8 +104,9 @@ initializeFirebase();
 // ------------------
 const io = socketIO(server, {
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST']
+    origin: corsOptions.origin,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 

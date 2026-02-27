@@ -90,7 +90,12 @@
     "shop": "दुकान",
     "wishlist": "इच्छा सूची",
     "cart": "कार्ट",
-    "farmerContact": "किसान संपर्क"
+    "farmerContact": "किसान संपर्क",
+    "marketIntelligence": "बाजार बुद्धिमत्ता",
+    "exchange": "विनिमय",
+    "labour": "श्रम",
+    "marketAI": "बाजार AI",
+    "more": "अधिक"
   },
   "retailer": {
     "title": "खुदरा विक्रेता डैशबोर्ड",
@@ -160,7 +165,23 @@
     "connectBuyers": "खरीदारों से जुड़ें",
     "news": "समाचार",
     "industryUpdates": "उद्योग अपडेट",
-    "policyBenefits": "नीति लाभ"
+    "policyBenefits": "नीति लाभ",
+    "volatilityAnalysis": "अस्थिरता और बिक्री विंडो",
+    "labourExchange": "श्रम विनिमय",
+    "postWork": "काम की आवश्यकताएं पोस्ट करें"
+  },
+  "weather": {
+    "title": "मौसम",
+    "loading": "मौसम लोड हो रहा है...",
+    "humidity": "आर्द्रता",
+    "wind": "हवा",
+    "feelsLike": "अनुभव",
+    "refresh": "रीफ्रेश"
+  },
+  "footer": {
+    "tagline": "किसानों को बाजारों, खरीदारों और ज्ञान से जोड़ना।",
+    "allRights": "सभी अधिकार सुरक्षित।",
+    "madeWith": "भारतीय किसानों के लिए प्यार से बनाया"
   },
   "orders": {
     "orderHistory": "ऑर्डर इतिहास"

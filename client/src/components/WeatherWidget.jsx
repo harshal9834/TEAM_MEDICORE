@@ -1,147 +1,201 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
-import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+const CACHE_KEY = 'gofarm_weather_cache';
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+const ICON_MAP = {
+  '01d': '☀️', '01n': '🌙',
+  '02d': '⛅', '02n': '🌥️',
+  '03d': '☁️', '03n': '☁️',
+  '04d': '☁️', '04n': '☁️',
+  '09d': '🌧️', '09n': '🌧️',
+  '10d': '🌦️', '10n': '🌧️',
+  '11d': '⛈️', '11n': '⛈️',
+  '13d': '❄️', '13n': '❄️',
+  '50d': '🌫️', '50n': '🌫️',
+};
 
 const WeatherWidget = () => {
+  const { t } = useTranslation();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [location, setLocation] = useState({ lat: 19.07, lon: 72.87 }); // Default: Mumbai
-  const navigate = useNavigate();
+  const [loc, setLoc] = useState({ lat: 19.07, lon: 72.87 });
 
+  // Try geolocation once
   useEffect(() => {
-    // Try to get user's location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          });
-        },
-        (err) => {
-          console.log('Geolocation error, using default:', err);
-          // Use default location if geolocation fails
-        }
+        (p) => setLoc({ lat: p.coords.latitude, lon: p.coords.longitude }),
+        () => { }
       );
     }
   }, []);
 
-  useEffect(() => {
-    fetchWeather();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
-
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async (force = false) => {
+    // Check cache first
+    if (!force) {
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+        if (cached && Date.now() - cached.ts < CACHE_TTL) {
+          setWeather(cached.data);
+          setLoading(false);
+          return;
+        }
+      } catch (_) { }
+    }
     setLoading(true);
     try {
-      const response = await api.get('/weather/current', {
-        params: {
-          lat: location.lat,
-          lon: location.lon
-        }
-      });
-
-      setWeather(response.data.data);
-      setError(null);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch weather');
-      console.error('Weather fetch error:', err);
+      const res = await api.get('/weather/current', { params: { lat: loc.lat, lon: loc.lon } });
+      const data = res.data.data;
+      setWeather(data);
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    } catch (_) {
+      // silently fail — widget just won't show
     } finally {
       setLoading(false);
     }
-  };
+  }, [loc]);
 
-  const getWeatherIcon = (iconCode) => {
-    const iconMap = {
-      '01d': '☀️', '01n': '🌙',
-      '02d': '⛅', '02n': '🌥️',
-      '03d': '☁️', '03n': '☁️',
-      '04d': '☁️', '04n': '☁️',
-      '09d': '🌧️', '09n': '🌧️',
-      '10d': '🌦️', '10n': '🌧️',
-      '11d': '⛈️', '11n': '⛈️',
-      '13d': '❄️', '13n': '❄️',
-      '50d': '🌫️', '50n': '🌫️'
-    };
-    return iconMap[iconCode] || '🌤️';
-  };
+  useEffect(() => { fetchWeather(); }, [fetchWeather]);
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-6">
-        <div className="animate-pulse text-center">
-          <p className="text-gray-600">मौसम जानकारी लोड हो रही है...</p>
+      <div style={styles.card}>
+        <div style={{ textAlign: 'center', color: '#8B5E3C', fontSize: '12px', padding: '8px 0' }}>
+          {t('weather.loading', '…')}
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 rounded-lg shadow-md p-6 border border-red-200">
-        <p className="text-red-700 text-sm">⚠️ {error}</p>
-      </div>
-    );
-  }
+  if (!weather) return null;
 
-  if (!weather) {
-    return null;
-  }
+  const icon = ICON_MAP[weather.icon] || '🌤️';
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">🌤️ मौसम</h3>
+    <div
+      style={styles.card}
+      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+    >
+      {/* Location row */}
+      <div style={styles.locationRow}>
+        <i className="fas fa-map-marker-alt" style={{ color: '#8B5E3C', fontSize: '10px' }} />
+        <span style={styles.locationText}>{weather.location}</span>
         <button
-          onClick={fetchWeather}
-          className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+          onClick={() => fetchWeather(true)}
+          title={t('common.refresh', 'Refresh')}
+          style={styles.refreshBtn}
         >
-          अपडेट करें
+          <i className="fas fa-sync-alt" style={{ fontSize: '9px' }} />
         </button>
       </div>
 
-      {/* Location */}
-      <p className="text-sm text-gray-600 mb-3">{weather.location}</p>
-
-      {/* Main Weather Display */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="text-5xl mb-2">{getWeatherIcon(weather.icon)}</div>
-          <p className="text-3xl font-bold text-gray-800">{weather.temperature}°C</p>
-          <p className="text-gray-600 capitalize">{weather.description}</p>
+      {/* Main row: icon + temp + humidity */}
+      <div style={styles.mainRow}>
+        <span style={styles.icon}>{icon}</span>
+        <div style={styles.tempBlock}>
+          <span style={styles.temp}>{Math.round(weather.temperature)}°</span>
+          <span style={styles.desc}>{weather.description}</span>
         </div>
-        <div className="text-right">
-          <div className="text-sm text-gray-700">
-            <p>अनुभव: <span className="font-semibold">{weather.feelsLike}°C</span></p>
-            <p>आर्द्रता: <span className="font-semibold">{weather.humidity}%</span></p>
-            <p>हवा: <span className="font-semibold">{weather.windSpeed} km/h</span></p>
+        <div style={styles.statsBlock}>
+          <div style={styles.stat}>
+            <i className="fas fa-tint" style={{ color: '#BFDFF5', fontSize: '10px' }} />
+            <span>{weather.humidity}%</span>
+          </div>
+          <div style={styles.stat}>
+            <i className="fas fa-wind" style={{ color: '#BFDFF5', fontSize: '10px' }} />
+            <span>{weather.windSpeed} km/h</span>
           </div>
         </div>
       </div>
-
-      {/* Farm Advice */}
-      <div className="bg-white rounded-lg p-3 mb-4">
-        <h4 className="font-semibold text-gray-800 mb-2 text-sm">🌾 कृषि सलाह:</h4>
-        <ul className="space-y-1">
-          {weather.farmingAdvice && weather.farmingAdvice.slice(0, 3).map((advice, idx) => (
-            <li key={idx} className="text-xs text-gray-700">
-              • {advice}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* View Forecast Button */}
-      <button
-        onClick={() => navigate('/farmer/weather')}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition font-semibold text-sm"
-      >
-        📊 पूरा पूर्वानुमान देखें
-      </button>
     </div>
   );
+};
+
+const styles = {
+  card: {
+    maxWidth: '260px',
+    width: '100%',
+    background: 'linear-gradient(135deg, #BFDFF5 0%, #d4ecd4 100%)',
+    borderRadius: '16px',
+    padding: '12px 14px',
+    boxShadow: '0 4px 14px rgba(90,143,61,0.12)',
+    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+    cursor: 'default',
+    fontFamily: "'Poppins', sans-serif",
+  },
+  locationRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    marginBottom: '8px',
+  },
+  locationText: {
+    fontSize: '11px',
+    fontWeight: 600,
+    color: '#4a3728',
+    flex: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  refreshBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#5A8F3D',
+    cursor: 'pointer',
+    padding: '2px 4px',
+    borderRadius: '6px',
+    opacity: 0.7,
+    flexShrink: 0,
+  },
+  mainRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  icon: {
+    fontSize: '32px',
+    lineHeight: 1,
+    flexShrink: 0,
+  },
+  tempBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+  },
+  temp: {
+    fontSize: '26px',
+    fontWeight: 800,
+    color: '#1a3d1e',
+    lineHeight: 1,
+  },
+  desc: {
+    fontSize: '10px',
+    color: '#4a5e3c',
+    textTransform: 'capitalize',
+    marginTop: '2px',
+  },
+  statsBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    flexShrink: 0,
+  },
+  stat: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '11px',
+    color: '#2E4A2E',
+    fontWeight: 600,
+    background: 'rgba(255,255,255,0.45)',
+    borderRadius: '8px',
+    padding: '2px 6px',
+  },
 };
 
 export default WeatherWidget;

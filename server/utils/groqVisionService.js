@@ -91,7 +91,7 @@ const generateTreatmentFromDiseasePrediction = async (predictedLabel, confidence
     }
 
     console.log(`💊 Generating treatment for ${predictedLabel} (${confidencePercent}% confidence)`);
-    
+
     const startTime = Date.now();
 
     // Replace placeholders in prompt with actual values
@@ -102,7 +102,7 @@ const generateTreatmentFromDiseasePrediction = async (predictedLabel, confidence
     const response = await axios.post(
       GROQ_API_URL,
       {
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'user',
@@ -203,7 +203,7 @@ const generateTreatmentFromDiseasePrediction = async (predictedLabel, confidence
     };
   } catch (error) {
     console.error('❌ Treatment generation failed:', error.message);
-    
+
     if (error.response) {
       console.error('API Response:', {
         status: error.response.status,

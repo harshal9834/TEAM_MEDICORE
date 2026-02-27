@@ -90,7 +90,12 @@
     "shop": "Shop",
     "wishlist": "Wishlist",
     "cart": "Cart",
-    "farmerContact": "Farmer Contact"
+    "farmerContact": "Farmer Contact",
+    "marketIntelligence": "Market Intelligence",
+    "exchange": "Exchange",
+    "labour": "Labour",
+    "marketAI": "Market AI",
+    "more": "More"
   },
   "retailer": {
     "title": "Retailer Dashboard",
@@ -160,7 +165,10 @@
     "connectBuyers": "Connect with buyers",
     "news": "NEWS",
     "industryUpdates": "Industry updates",
-    "policyBenefits": "Policy benefits"
+    "policyBenefits": "Policy benefits",
+    "volatilityAnalysis": "Volatility & selling window",
+    "labourExchange": "Labour Exchange",
+    "postWork": "Post work requirements"
   },
   "orders": {
     "orderHistory": "Order History"
@@ -457,5 +465,18 @@
     "noRecommendations": "No recommendations available",
     "noTips": "No prevention tips available",
     "uploadError": "Please select an image first."
+  },
+  "weather": {
+    "title": "Weather",
+    "loading": "Loading weather...",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "feelsLike": "Feels like",
+    "refresh": "Refresh"
+  },
+  "footer": {
+    "tagline": "Connecting farmers with markets, buyers & knowledge.",
+    "allRights": "All rights reserved.",
+    "madeWith": "Made with love for Indian farmers"
   }
 }

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const GoFarmLayout = () => {
     const location = useLocation();
     const { user } = useAuthStore();
+    const [searchTerm, setSearchTerm] = useState('');
     const currentPath = location.pathname;
 
     const tabs = [
@@ -18,22 +20,35 @@ const GoFarmLayout = () => {
 
     const isActive = (path) => currentPath === path;
 
+
+
     return (
-        <div className="gofarm-app">
-            {/* Top Header Bar */}
+        <div className={`gofarm-app`}>
+            {/* Top Header — matches screenshot */}
             <header className="gofarm-header">
                 <div className="gofarm-header-inner">
                     <div className="flex items-center gap-2">
-                        <i className="fas fa-leaf text-xl text-emerald-500"></i>
-                        <h1 className="text-xl font-bold">
-                            <span className="text-emerald-700">Go</span>
-                            <span className="text-amber-500">Farm</span>
+                        <i className="fas fa-leaf text-xl" style={{ color: '#4E9F3D' }}></i>
+                        <h1 className="text-xl font-bold" style={{ fontFamily: "'Baloo 2', sans-serif" }}>
+                            <span style={{ color: '#2F6F3E' }}>Go</span>
+                            <span style={{ color: '#D4A017' }}>Farm</span>
                         </h1>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Link to="/chat" className="gofarm-header-icon">
-                            <i className="fas fa-bell text-base"></i>
-                        </Link>
+
+                    <div className="relative flex-1 max-w-xs mx-4">
+                        <i className="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        <input
+                            type="text"
+                            placeholder="Search"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="gf-input pl-9 py-2 text-sm"
+                            style={{ borderRadius: 20 }}
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <LanguageSwitcher />
                         <Link to="/profile" className="gofarm-avatar">
                             <i className="fas fa-user text-xs text-white"></i>
                         </Link>
@@ -43,10 +58,9 @@ const GoFarmLayout = () => {
 
             {/* Page Content */}
             <main className="gofarm-content">
-                <Outlet />
+                <Outlet context={{ searchTerm }} />
             </main>
 
-            {/* Bottom Navigation */}
             <nav className="gofarm-bottom-nav">
                 <div className="gofarm-nav-inner">
                     {tabs.map((tab) => {

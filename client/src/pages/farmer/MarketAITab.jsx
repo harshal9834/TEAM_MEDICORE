@@ -57,12 +57,12 @@ const MarketAITab = () => {
                             : selectedCrop === 'Cotton' ? [6300, 6350, 6400, 6450, 6500, 6600, pred.predicted]
                                 : selectedCrop === 'Onion' ? [2000, 1950, 1900, 1850, 1800, 1750, pred.predicted]
                                     : [1800, 1900, 2000, 2050, 2100, 2200, pred.predicted],
-                borderColor: pred.trend === 'up' ? '#059669' : '#dc2626',
-                backgroundColor: pred.trend === 'up' ? 'rgba(5,150,105,0.08)' : 'rgba(220,38,38,0.08)',
+                borderColor: pred.trend === 'up' ? '#4E9F3D' : '#B0413E',
+                backgroundColor: pred.trend === 'up' ? 'rgba(78,159,61,0.08)' : 'rgba(176,65,62,0.08)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 3,
-                pointBackgroundColor: pred.trend === 'up' ? '#059669' : '#dc2626',
+                pointBackgroundColor: pred.trend === 'up' ? '#4E9F3D' : '#B0413E',
                 borderWidth: 2.5,
             },
         ],
@@ -89,7 +89,7 @@ const MarketAITab = () => {
             {/* Section 1: Live Market Prices */}
             <div className="gf-section">
                 <div className="gf-section-title">
-                    <span className="gf-title-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
+                    <span className="gf-title-icon" style={{ background: '#e8f0e4', color: '#2F6F3E' }}>
                         <i className="fas fa-chart-bar"></i>
                     </span>
                     Live Market Prices
@@ -124,7 +124,7 @@ const MarketAITab = () => {
             {/* Section 2: AI Prediction Block */}
             <div className="gf-section">
                 <div className="gf-section-title">
-                    <span className="gf-title-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                    <span className="gf-title-icon" style={{ background: '#fdf6e3', color: '#8B5E3C' }}>
                         <i className="fas fa-robot"></i>
                     </span>
                     AI Price Prediction
@@ -160,7 +160,8 @@ const MarketAITab = () => {
                             <div className="text-xs opacity-70">Predicted (7d)</div>
                             <div className="text-lg font-bold flex items-center gap-1.5">
                                 ₹{pred.predicted?.toLocaleString()}
-                                <i className={`fas fa-arrow-${pred.trend === 'up' ? 'up' : 'down'} text-sm ${pred.trend === 'up' ? 'text-emerald-300' : 'text-red-300'}`}></i>
+                                <i className={`fas fa-arrow-${pred.trend === 'up' ? 'up' : 'down'} text-sm ${pred.trend === 'up' ? 'text-green-300' : 'text-red-300'}`}></i>
+                                <span className="gf-pulse-dot ml-1"></span>
                             </div>
                         </div>
                     </div>
@@ -175,7 +176,7 @@ const MarketAITab = () => {
             {/* Section 3: Demand Trend Graph */}
             <div className="gf-section">
                 <div className="gf-section-title">
-                    <span className="gf-title-icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                    <span className="gf-title-icon" style={{ background: '#fdf6e3', color: '#D4A017' }}>
                         <i className="fas fa-chart-area"></i>
                     </span>
                     Demand Trend — {selectedCrop}
@@ -190,7 +191,7 @@ const MarketAITab = () => {
             {/* Section 4: Crop Recommendation */}
             <div className="gf-section">
                 <div className="gf-section-title">
-                    <span className="gf-title-icon" style={{ background: '#fffbeb', color: '#d97706' }}>
+                    <span className="gf-title-icon" style={{ background: '#e8f0e4', color: '#4E9F3D' }}>
                         <i className="fas fa-lightbulb"></i>
                     </span>
                     Crop Recommendations
