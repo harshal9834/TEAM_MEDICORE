@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ordersAPI } from '../../utils/api';
-import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const Orders = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -89,8 +87,8 @@ const Orders = () => {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-4 py-2 rounded-full text-sm font-semibold capitalize transition ${filter === s
-                  ? 'bg-green-600 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border'
+                ? 'bg-green-600 text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border'
                 }`}
             >
               {s}

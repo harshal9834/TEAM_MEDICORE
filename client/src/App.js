@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
@@ -85,7 +84,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 function App() {
   const { isAuthenticated, user } = useAuthStore();
-  const navigate = useNavigate();
 
   return (
     <SocketProvider>

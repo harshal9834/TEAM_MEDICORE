@@ -15,7 +15,7 @@ const Login = () => {
 
   const [step, setStep] = useState(1); // 1=enter ID, 2=enter OTP
   const [customID, setCustomID] = useState(idFromState);
-  const [phone, setPhone] = useState('');
+  const [, setPhone] = useState('');
   const [maskedPhone, setMaskedPhone] = useState('');
   const [userName, setUserName] = useState('');
   const [otp, setOtp] = useState('');

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { disputeAPI, IMAGE_BASE_URL } from '../../utils/api';
 
 const statusBadge = {

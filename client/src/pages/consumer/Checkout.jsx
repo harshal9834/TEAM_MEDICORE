@@ -11,7 +11,7 @@ const Checkout = () => {
     const { items: cartItems, getTotal, clearCart } = useCartStore();
     const [placing, setPlacing] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('cod');
-    const [showQR, setShowQR] = useState(false);
+    const [, setShowQR] = useState(false);
     const [address, setAddress] = useState({
         address: '',
         city: '',

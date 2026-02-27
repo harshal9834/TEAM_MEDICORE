@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { IMAGE_BASE_URL } from '../../utils/api';
 import toast from 'react-hot-toast';

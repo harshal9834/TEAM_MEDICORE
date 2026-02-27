@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
@@ -8,7 +7,6 @@ import locationData from '../../data/locationData.json';
 import api from '../../utils/api';
 
 const Register = () => {
-  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const roleFromState = location.state?.role || 'farmer';
