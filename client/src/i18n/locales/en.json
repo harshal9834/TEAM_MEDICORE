@@ -114,7 +114,16 @@
     "contactFarmers": "Contact Farmers",
     "viewProfile": "View Profile",
     "addForConsumer": "Add for Consumer",
-    "createListings": "Create listings"
+    "createListings": "Create listings",
+    "categories": "Categories",
+    "all": "All",
+    "connectFarmers": "Connect with farmers",
+    "shopAll": "Shop All",
+    "market": "Market",
+    "aiAssistant": "AI Assistant",
+    "reportSection": "Report Section",
+    "submitReports": "Submit reports",
+    "shareConnect": "Share & connect"
   },
   "dashboard": {
     "selectRole": "Select Your Role",

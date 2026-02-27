@@ -5,7 +5,7 @@ const User = require('../models/User.model');
 /**
  * POST /api/orders
  * Create a new order from cart items.
- * Body: { items: [{ product, quantity, price }], deliveryAddress, paymentMethod }
+ * Body: { items: [{ product, quantity, price, name }], deliveryAddress, paymentMethod }
  */
 exports.createOrder = async (req, res) => {
   try {
@@ -15,21 +15,42 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No items in order' });
     }
 
-    // Calculate totals
-    const orderItems = items.map(item => ({
-      product: item.product,
-      quantity: item.quantity,
-      price: item.price,
-      total: item.price * item.quantity
-    }));
+    // Build order items - handle both product ID and name-based items
+    const orderItems = [];
+    let sellerId = null;
+
+    for (const item of items) {
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.price) || 0;
+      const orderItem = {
+        quantity: qty,
+        price: price,
+        total: price * qty,
+        name: item.name || 'Product'
+      };
+
+      // Try to link to a product if we have a valid product ID
+      if (item.product && item.product.match && item.product.match(/^[0-9a-fA-F]{24}$/)) {
+        orderItem.product = item.product;
+        // Get seller from the product
+        if (!sellerId) {
+          const dbProduct = await Product.findById(item.product);
+          if (dbProduct) {
+            sellerId = dbProduct.seller;
+            orderItem.name = dbProduct.name || item.name || 'Product';
+          }
+        }
+      }
+
+      orderItems.push(orderItem);
+    }
 
     const subtotal = orderItems.reduce((sum, item) => sum + item.total, 0);
-    const deliveryFee = 40;
+    const deliveryFee = subtotal >= 500 ? 0 : 40;
     const total = subtotal + deliveryFee;
 
-    // Get seller from first product
-    const firstProduct = await Product.findById(items[0].product);
-    const sellerId = firstProduct ? firstProduct.seller : req.user._id;
+    // Fallback seller to buyer if no product found
+    if (!sellerId) sellerId = req.user._id;
 
     const order = new Order({
       buyer: req.user._id,
@@ -40,22 +61,28 @@ exports.createOrder = async (req, res) => {
       total,
       deliveryAddress: deliveryAddress || {},
       paymentMethod: paymentMethod || 'cod',
-      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
+      paymentStatus: 'pending',
       status: 'confirmed'
     });
 
     await order.save();
 
-    // Populate for response
-    await order.populate('buyer', 'name phone customID');
-    await order.populate('seller', 'name phone customID');
-    await order.populate('items.product', 'name price unit images');
+    // Populate for response (safely)
+    try {
+      await order.populate('buyer', 'name phone customID');
+      await order.populate('seller', 'name phone customID');
+      await order.populate('items.product', 'name price unit images');
+    } catch (popErr) {
+      console.log('⚠️ Populate warning:', popErr.message);
+    }
 
-    // Decrease product stock
-    for (const item of items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { quantity: -item.quantity }
-      });
+    // Decrease product stock for items with valid product IDs
+    for (const item of orderItems) {
+      if (item.product) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { quantity: -item.quantity }
+        });
+      }
     }
 
     res.status(201).json({
@@ -65,14 +92,14 @@ exports.createOrder = async (req, res) => {
       receipt: {
         orderNumber: order.orderNumber,
         buyer: {
-          name: order.buyer.name,
-          phone: order.buyer.phone,
-          customID: order.buyer.customID
+          name: order.buyer?.name || req.user.name,
+          phone: order.buyer?.phone || req.user.phone,
+          customID: order.buyer?.customID || req.user.customID
         },
         seller: {
-          name: order.seller.name,
-          phone: order.seller.phone,
-          customID: order.seller.customID
+          name: order.seller?.name || 'Seller',
+          phone: order.seller?.phone || '',
+          customID: order.seller?.customID || ''
         },
         items: order.items,
         subtotal: order.subtotal,

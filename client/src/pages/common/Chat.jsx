@@ -36,8 +36,8 @@ const Chat = () => {
     if (socket && typeof socket.on === 'function') {
       socket.on('new-message', (data) => {
         // Update chat list with new message
-        setChats(prev => prev.map(chat => 
-          chat._id === data.chatId 
+        setChats(prev => prev.map(chat =>
+          chat._id === data.chatId
             ? { ...chat, lastMessage: data.message.content, lastMessageAt: new Date() }
             : chat
         ));
@@ -54,9 +54,9 @@ const Chat = () => {
   const fetchChats = async () => {
     try {
       setLoading(true);
-      
+
       let chats = [];
-      
+
       // Try to fetch from API first
       try {
         const response = await chatAPI.getChats();
@@ -81,8 +81,8 @@ const Chat = () => {
                 email: user.email
               }
             ],
-            lastMessage: user.role === 'farmer' 
-              ? 'I need 500kg of fresh tomatoes. What\'s your best price?' 
+            lastMessage: user.role === 'farmer'
+              ? 'I need 500kg of fresh tomatoes. What\'s your best price?'
               : 'Yes, I can supply 500kg tomatoes at ₹25/kg. When do you need them?',
             lastMessageAt: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
             unreadCount: new Map([[user._id, 1]]),
@@ -104,8 +104,8 @@ const Chat = () => {
                 email: user.email
               }
             ],
-            lastMessage: user.role === 'farmer' 
-              ? 'Do you have organic vegetables available?' 
+            lastMessage: user.role === 'farmer'
+              ? 'Do you have organic vegetables available?'
               : 'Yes! I have fresh organic carrots, spinach, and cauliflower.',
             lastMessageAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
             unreadCount: new Map(),
@@ -113,7 +113,7 @@ const Chat = () => {
           }
         ];
       }
-      
+
       setChats(chats);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -138,9 +138,9 @@ const Chat = () => {
   const fetchAvailableUsers = async () => {
     try {
       setLoadingUsers(true);
-      
+
       let users = [];
-      
+
       // Try to fetch from API first
       try {
         const response = await chatAPI.getAvailableUsers();
@@ -181,7 +181,7 @@ const Chat = () => {
           }
         ];
       }
-      
+
       // Filter out current user and existing chat participants
       const existingParticipants = new Set();
       chats.forEach(chat => {
@@ -191,11 +191,11 @@ const Chat = () => {
           }
         });
       });
-      
-      const filteredUsers = users.filter(u => 
+
+      const filteredUsers = users.filter(u =>
         u._id !== user._id && !existingParticipants.has(u._id)
       );
-      
+
       setAvailableUsers(filteredUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -245,13 +245,16 @@ const Chat = () => {
 
   const getUnreadCount = (chat) => {
     if (!chat.unreadCount || !user._id) return 0;
-    return chat.unreadCount.get(user._id) || 0;
+    if (chat.unreadCount instanceof Map) {
+      return chat.unreadCount.get(user._id) || 0;
+    }
+    return chat.unreadCount[user._id] || 0;
   };
 
   const filteredChats = chats.filter(chat => {
     const otherUser = getOtherParticipant(chat);
     return otherUser?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           chat.lastMessage?.toLowerCase().includes(searchTerm.toLowerCase());
+      chat.lastMessage?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const totalUnread = chats.reduce((sum, chat) => sum + getUnreadCount(chat), 0);
@@ -259,7 +262,7 @@ const Chat = () => {
   // Show ChatRoom if a chat is selected
   if (showChatRoom && selectedChat) {
     return (
-      <ChatRoom 
+      <ChatRoom
         chatId={selectedChat._id}
         currentUser={user}
         onClose={handleCloseChatRoom}
@@ -286,7 +289,7 @@ const Chat = () => {
                   {totalUnread}
                 </span>
               )}
-              <button 
+              <button
                 onClick={openNewChatModal}
                 className="hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all"
                 title="Start new chat"
@@ -295,7 +298,7 @@ const Chat = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Search */}
           <div className="relative">
             <i className="fas fa-search absolute left-3 top-3 text-green-200"></i>
@@ -319,7 +322,7 @@ const Chat = () => {
             filteredChats.map(chat => {
               const otherUser = getOtherParticipant(chat);
               const unreadCount = getUnreadCount(chat);
-              
+
               return (
                 <div
                   key={chat._id}
@@ -328,13 +331,12 @@ const Chat = () => {
                 >
                   <div className="flex items-start space-x-3">
                     <div className="relative flex-shrink-0">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                        otherUser?.role === 'farmer' 
-                          ? 'bg-gradient-to-r from-green-400 to-green-600' 
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${otherUser?.role === 'farmer'
+                          ? 'bg-gradient-to-r from-green-400 to-green-600'
                           : otherUser?.role === 'retailer'
-                          ? 'bg-gradient-to-r from-blue-400 to-blue-600'
-                          : 'bg-gradient-to-r from-purple-400 to-purple-600'
-                      }`}>
+                            ? 'bg-gradient-to-r from-blue-400 to-blue-600'
+                            : 'bg-gradient-to-r from-purple-400 to-purple-600'
+                        }`}>
                         {otherUser?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                     </div>
@@ -352,16 +354,15 @@ const Chat = () => {
                         )}
                       </div>
                       <div className="flex items-center space-x-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          otherUser?.role === 'farmer' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${otherUser?.role === 'farmer'
+                            ? 'bg-green-100 text-green-800'
                             : otherUser?.role === 'retailer'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
-                        }`}>
-                          {otherUser?.role === 'farmer' ? 'Farmer' : 
-                           otherUser?.role === 'retailer' ? 'Retailer' : 
-                           otherUser?.role === 'consumer' ? 'Consumer' : 'User'}
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-purple-100 text-purple-800'
+                          }`}>
+                          {otherUser?.role === 'farmer' ? 'Farmer' :
+                            otherUser?.role === 'retailer' ? 'Retailer' :
+                              otherUser?.role === 'consumer' ? 'Consumer' : 'User'}
                         </span>
                       </div>
                     </div>
@@ -404,7 +405,7 @@ const Chat = () => {
             <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold">Start New Chat</h3>
-                <button 
+                <button
                   onClick={() => setShowNewChatModal(false)}
                   className="hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all"
                 >
@@ -412,7 +413,7 @@ const Chat = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-4">
               {loadingUsers ? (
                 <div className="flex justify-center items-center py-8">
@@ -426,28 +427,26 @@ const Chat = () => {
                       onClick={() => handleStartNewChat(user._id)}
                       className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-all"
                     >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                        user.role === 'farmer' 
-                          ? 'bg-gradient-to-r from-green-400 to-green-600' 
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${user.role === 'farmer'
+                          ? 'bg-gradient-to-r from-green-400 to-green-600'
                           : user.role === 'retailer'
-                          ? 'bg-gradient-to-r from-blue-400 to-blue-600'
-                          : 'bg-gradient-to-r from-purple-400 to-purple-600'
-                      }`}>
+                            ? 'bg-gradient-to-r from-blue-400 to-blue-600'
+                            : 'bg-gradient-to-r from-purple-400 to-purple-600'
+                        }`}>
                         {user.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-800">{user.name}</h4>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            user.role === 'farmer' 
-                              ? 'bg-green-100 text-green-800' 
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user.role === 'farmer'
+                              ? 'bg-green-100 text-green-800'
                               : user.role === 'retailer'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-purple-100 text-purple-800'
-                          }`}>
-                            {user.role === 'farmer' ? 'Farmer' : 
-                             user.role === 'retailer' ? 'Retailer' : 
-                             'Consumer'}
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-purple-100 text-purple-800'
+                            }`}>
+                            {user.role === 'farmer' ? 'Farmer' :
+                              user.role === 'retailer' ? 'Retailer' :
+                                'Consumer'}
                           </span>
                         </div>
                       </div>

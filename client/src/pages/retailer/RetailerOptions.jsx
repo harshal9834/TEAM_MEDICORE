@@ -52,42 +52,42 @@ const RetailerOptions = () => {
     },
     {
       name: t('retailer.farmerContact'),
-      subtitle: t('retailer.connectFarmers') || 'Connect with farmers',
+      subtitle: t('retailer.connectFarmers'),
       icon: 'fa-handshake',
       color: 'yellow',
       link: '/retailer/farmers'
     },
     {
-      name: t('retailer.market') || 'Market',
-      subtitle: t('retailer.shopAll') || 'Shop All',
+      name: t('retailer.market'),
+      subtitle: t('retailer.shopAll'),
       icon: 'fa-store',
       color: 'purple',
       link: '/products'
     },
     {
       name: t('retailer.chatBot'),
-      subtitle: t('retailer.aiAssistant') || 'AI Assistant',
+      subtitle: t('retailer.getHelp'),
       icon: 'fa-robot',
       color: 'amber',
       link: '/retailer/chatbot'
     },
     {
-      name: t('retailer.addForConsumer') || 'Add for Consumer',
-      subtitle: t('retailer.createListings') || 'Create listings',
+      name: t('retailer.addForConsumer'),
+      subtitle: t('retailer.createListings'),
       icon: 'fa-user-plus',
       color: 'purple',
       link: '/retailer/consumer-listings'
     },
     {
-      name: t('retailer.reportSection') || 'Report Section',
-      subtitle: t('retailer.submitReports') || 'Submit reports',
+      name: t('retailer.reportSection'),
+      subtitle: t('retailer.submitReports'),
       icon: 'fa-file-alt',
       color: 'green',
       link: '/report'
     },
     {
       name: t('retailer.posts'),
-      subtitle: t('retailer.shareConnect') || 'Share & connect',
+      subtitle: t('retailer.shareConnect'),
       icon: 'fa-edit',
       color: 'purple',
       link: '/retailer/community'
@@ -118,7 +118,7 @@ const RetailerOptions = () => {
                 <span className="text-yellow-400">Farm</span>
               </h1>
             </div>
-            
+
             <div className="relative flex-1 max-w-2xl mx-6">
               <i className="fas fa-search absolute left-4 top-4 text-gray-400"></i>
               <input
@@ -129,17 +129,17 @@ const RetailerOptions = () => {
                 className="pl-12 pr-4 py-3 w-full rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition shadow-lg"
               />
             </div>
-            
+
             <button className="bg-yellow-400 hover:bg-yellow-500 transition p-3 rounded-full shadow-lg">
               <i className="fas fa-shopping-cart text-white text-xl"></i>
             </button>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <LanguageSwitcher />
             </div>
-            
+
             <div className="flex space-x-4">
               <button className="hover:text-yellow-400 transition">
                 <i className="fas fa-bell text-xl"></i>
@@ -171,16 +171,15 @@ const RetailerOptions = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Dots navigation */}
           <div className="flex justify-center mt-6 space-x-3">
             {banners.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentBanner(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  currentBanner === index ? 'bg-green-600 w-8' : 'bg-gray-300'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all ${currentBanner === index ? 'bg-green-600 w-8' : 'bg-gray-300'
+                  }`}
               />
             ))}
           </div>
@@ -189,12 +188,12 @@ const RetailerOptions = () => {
         {/* Categories Section */}
         <section>
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">{t('retailer.categories') || 'Categories'}</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{t('retailer.categories')}</h2>
             <button className="text-green-600 hover:text-green-800 flex items-center font-semibold text-lg">
-              {t('common.view')} {t('retailer.all') || 'All'} <i className="fas fa-chevron-right ml-2"></i>
+              {t('common.view')} {t('retailer.all')} <i className="fas fa-chevron-right ml-2"></i>
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredCategories.map((category, index) => (
               <Link

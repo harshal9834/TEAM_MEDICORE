@@ -114,7 +114,16 @@
     "contactFarmers": "शेतकऱ्यांशी संपर्क साधा",
     "viewProfile": "प्रोफाइल पहा",
     "addForConsumer": "ग्राहकांसाठी जोडा",
-    "createListings": "यादी तयार करा"
+    "createListings": "यादी तयार करा",
+    "categories": "श्रेणी",
+    "all": "सर्व",
+    "connectFarmers": "शेतकऱ्यांशी जोडा",
+    "shopAll": "सर्व खरेदी करा",
+    "market": "बाजार",
+    "aiAssistant": "AI सहाय्यक",
+    "reportSection": "अहवाल विभाग",
+    "submitReports": "अहवाल सबमिट करा",
+    "shareConnect": "शेअर करा आणि जोडा"
   },
   "dashboard": {
     "selectRole": "आपली भूमिका निवडा",

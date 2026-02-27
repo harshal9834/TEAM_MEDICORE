@@ -55,6 +55,8 @@ import ConsumerChatBot from './pages/consumer/ChatBot';
 
 import ConsumerShop from './pages/consumer/ConsumerShop';
 import Wishlist from './pages/consumer/Wishlist';
+import Checkout from './pages/consumer/Checkout';
+import OrderConfirmation from './pages/consumer/OrderConfirmation';
 
 // Common Pages
 import Profile from './pages/common/Profile';
@@ -323,6 +325,16 @@ function App() {
               <Route path="/consumer/wishlist" element={
                 <ProtectedRoute allowedRoles={['consumer']}>
                   <Wishlist />
+                </ProtectedRoute>
+              } />
+              <Route path="/checkout" element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              } />
+              <Route path="/order-confirmation/:id" element={
+                <ProtectedRoute>
+                  <OrderConfirmation />
                 </ProtectedRoute>
               } />
 

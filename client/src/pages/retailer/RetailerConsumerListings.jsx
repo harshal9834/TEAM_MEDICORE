@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import { productsAPI, IMAGE_BASE_URL } from '../../utils/api';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ const RetailerConsumerListings = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+
   const [newListing, setNewListing] = useState({
     name: '',
     description: '',
@@ -45,27 +45,20 @@ const RetailerConsumerListings = () => {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      
-      // Only show error if user is definitely not authenticated, not just loading
+
       if (!isAuthenticated || !user?._id) {
         console.log('❌ User not authenticated:', { isAuthenticated, user: user?._id });
         setLoading(false);
         return;
       }
 
-      // Check if user is a retailer
       if (user.role !== 'retailer') {
         console.log('❌ User is not a retailer:', user.role);
         setLoading(false);
         return;
       }
-      
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/products?seller=${user._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
+
+      const response = await productsAPI.getAll({ seller: user._id });
       setListings(response.data.products || []);
     } catch (error) {
       console.error('Error fetching listings:', error);
@@ -77,7 +70,7 @@ const RetailerConsumerListings = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     const validFiles = files.filter(file => {
       const isValid = file.type.startsWith('image/');
       if (!isValid) {
@@ -109,7 +102,7 @@ const RetailerConsumerListings = () => {
 
   const handleCreateListing = async (e) => {
     e.preventDefault();
-    
+
     if (!newListing.name || !newListing.price || !newListing.quantity) {
       toast.error(t('consumerListings.fillRequired'));
       return;
@@ -137,24 +130,10 @@ const RetailerConsumerListings = () => {
         formData.append('images', image);
       });
 
-      const token = localStorage.getItem('token');
-      const apiUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/products`;
-      console.log('🔗 API URL:', apiUrl);
-      console.log('🌍 REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-      
-      await axios.post(
-        apiUrl,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      await productsAPI.create(formData);
 
       await fetchListings();
-      
+
       setShowAddForm(false);
       setNewListing({
         name: '',
@@ -171,7 +150,8 @@ const RetailerConsumerListings = () => {
       toast.success(t('consumerListings.createdSuccess'));
     } catch (error) {
       console.error('Error creating listing:', error);
-      toast.error(t('consumerListings.createFailed'));
+      const msg = error.response?.data?.message || t('consumerListings.createFailed');
+      toast.error(msg);
     } finally {
       setUploading(false);
     }
@@ -180,11 +160,7 @@ const RetailerConsumerListings = () => {
   const handleDeleteListing = async (id) => {
     if (window.confirm(t('consumerListings.deleteConfirm'))) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/products/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await productsAPI.delete(id);
         await fetchListings();
         toast.success(t('consumerListings.deletedSuccess'));
       } catch (error) {
@@ -263,21 +239,20 @@ const RetailerConsumerListings = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {listings.map(listing => (
-              <div 
-                key={listing._id} 
+              <div
+                key={listing._id}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >
                 <div className="h-48 bg-gray-200 overflow-hidden relative">
                   {listing.images && listing.images[0] ? (
-                    <img 
-                      src={`http://localhost:5000${listing.images[0].url}`}
+                    <img
+                      src={listing.images[0].url?.startsWith('http') ? listing.images[0].url : `${IMAGE_BASE_URL}${listing.images[0].url}`}
                       alt={listing.name || 'Product'}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
-                        // Only fallback once to prevent infinite loops
                         if (!e.target.dataset.fallbackAttempted) {
                           e.target.dataset.fallbackAttempted = 'true';
-                          e.target.src = 'http://localhost:5000/image/dari.jpeg';
+                          e.target.src = `${IMAGE_BASE_URL}/image/dari.jpeg`;
                         }
                       }}
                     />
@@ -291,7 +266,7 @@ const RetailerConsumerListings = () => {
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-gray-800 mb-2">{listing.name || 'Unnamed Product'}</h3>
                   <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{listing.description || 'No description'}</p>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Price:</span>
@@ -320,7 +295,7 @@ const RetailerConsumerListings = () => {
                       <i className="fas fa-eye mr-1"></i>
                       {t('consumerListings.view')}
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeleteListing(listing._id)}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300"
                     >
@@ -384,7 +359,7 @@ const RetailerConsumerListings = () => {
                   <i className="fas fa-times text-xl"></i>
                 </button>
               </div>
-              
+
               <form onSubmit={handleCreateListing} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -393,7 +368,7 @@ const RetailerConsumerListings = () => {
                   <input
                     type="text"
                     value={newListing.name}
-                    onChange={(e) => setNewListing({...newListing, name: e.target.value})}
+                    onChange={(e) => setNewListing({ ...newListing, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder={t('consumerListings.namePlaceholder')}
                     required
@@ -404,7 +379,7 @@ const RetailerConsumerListings = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('consumerListings.category')}</label>
                   <select
                     value={newListing.category}
-                    onChange={(e) => setNewListing({...newListing, category: e.target.value})}
+                    onChange={(e) => setNewListing({ ...newListing, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="vegetables">Vegetables</option>
@@ -426,7 +401,7 @@ const RetailerConsumerListings = () => {
                     <input
                       type="number"
                       value={newListing.price}
-                      onChange={(e) => setNewListing({...newListing, price: e.target.value})}
+                      onChange={(e) => setNewListing({ ...newListing, price: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="₹"
                       required
@@ -436,7 +411,7 @@ const RetailerConsumerListings = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('consumerListings.unit')}</label>
                     <select
                       value={newListing.unit}
-                      onChange={(e) => setNewListing({...newListing, unit: e.target.value})}
+                      onChange={(e) => setNewListing({ ...newListing, unit: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="kg">kg</option>
@@ -456,7 +431,7 @@ const RetailerConsumerListings = () => {
                   <input
                     type="number"
                     value={newListing.quantity}
-                    onChange={(e) => setNewListing({...newListing, quantity: e.target.value})}
+                    onChange={(e) => setNewListing({ ...newListing, quantity: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="Available quantity"
                     required
@@ -469,7 +444,7 @@ const RetailerConsumerListings = () => {
                     <i className="fas fa-images mr-2 text-indigo-600"></i>
                     {t('consumerListings.productImages')} <span className="text-red-500">*</span> (Max 5)
                   </label>
-                  <input 
+                  <input
                     type="file"
                     accept="image/*"
                     multiple
@@ -477,14 +452,14 @@ const RetailerConsumerListings = () => {
                     className="w-full border-2 border-dashed border-gray-300 p-3 rounded-lg cursor-pointer hover:border-indigo-500 text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1">{t('consumerListings.supportedImages')}</p>
-                  
+
                   {/* Image Previews */}
                   {imagePreviews.length > 0 && (
                     <div className="grid grid-cols-3 gap-2 mt-3">
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="relative">
-                          <img 
-                            src={preview} 
+                          <img
+                            src={preview}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-20 object-cover rounded-lg"
                           />
@@ -505,7 +480,7 @@ const RetailerConsumerListings = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('consumerListings.description')}</label>
                   <textarea
                     value={newListing.description}
-                    onChange={(e) => setNewListing({...newListing, description: e.target.value})}
+                    onChange={(e) => setNewListing({ ...newListing, description: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-vertical"
                     rows="3"
                     placeholder={t('consumerListings.descriptionPlaceholder')}
@@ -515,10 +490,10 @@ const RetailerConsumerListings = () => {
                 {/* Checkboxes */}
                 <div className="flex gap-4">
                   <label className="flex items-center cursor-pointer">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={newListing.organic}
-                      onChange={(e) => setNewListing({...newListing, organic: e.target.checked})}
+                      onChange={(e) => setNewListing({ ...newListing, organic: e.target.checked })}
                       className="mr-2 w-4 h-4"
                     />
                     <span className="text-sm text-gray-700">
@@ -526,10 +501,10 @@ const RetailerConsumerListings = () => {
                     </span>
                   </label>
                   <label className="flex items-center cursor-pointer">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={newListing.certified}
-                      onChange={(e) => setNewListing({...newListing, certified: e.target.checked})}
+                      onChange={(e) => setNewListing({ ...newListing, certified: e.target.checked })}
                       className="mr-2 w-4 h-4"
                     />
                     <span className="text-sm text-gray-700">

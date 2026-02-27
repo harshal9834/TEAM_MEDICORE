@@ -114,7 +114,16 @@
     "contactFarmers": "किसानों से संपर्क करें",
     "viewProfile": "प्रोफाइल देखें",
     "addForConsumer": "उपभोक्ता के लिए जोड़ें",
-    "createListings": "सूची बनाएं"
+    "createListings": "सूची बनाएं",
+    "categories": "श्रेणियां",
+    "all": "सभी",
+    "connectFarmers": "किसानों से जुड़ें",
+    "shopAll": "सभी खरीदारी करें",
+    "market": "बाजार",
+    "aiAssistant": "AI सहायक",
+    "reportSection": "रिपोर्ट अनुभाग",
+    "submitReports": "रिपोर्ट जमा करें",
+    "shareConnect": "साझा करें और जुड़ें"
   },
   "dashboard": {
     "selectRole": "अपनी भूमिका चुनें",
